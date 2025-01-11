@@ -222,7 +222,7 @@ const MapForm: React.FC = () => {
       <div className="flex lg:flex-row flex-col gap-4">
         <Card className="lg:order-1 order-2 overflow-y-scroll h-[80vh] md:h-[95vh]">
           <CardContent className="space-y-4 ">
-            <Label className="text-xl my-3 flex gap-2">
+            <Label className="flex gap-2">
               <MapPinned />
               Puntos
             </Label>
@@ -240,10 +240,10 @@ const MapForm: React.FC = () => {
                       <Card>
                         <CardContent>
                           <h3 className="text-xl font-semibold mb-2 flex gap-2 text-secondary">
-                            <MapPin />
+                            <MapPin/>
                             {marker.nombre}
                           </h3>
-                          <Separator className="relative bg-black/30 my-3 dark:bg-white " />
+                          <Separator className="relative bg-primary/50 my-3" />
                           <div className="flex gap-2 mb-2">
                             <p className="text-wrap break-words w-1/2">
                               <strong>Latitud:</strong> {marker.latitud}
