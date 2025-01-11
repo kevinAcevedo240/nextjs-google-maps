@@ -16,7 +16,17 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import Modal from "@/components/ui/modal";
 
 // Icons
-import { Earth, LocateFixed, MapPin, MapPinned, Trash } from "lucide-react";
+import {
+  BikeIcon,
+  Bus,
+  CarFront,
+  Earth,
+  FootprintsIcon,
+  LocateFixed,
+  MapPin,
+  MapPinned,
+  Trash,
+} from "lucide-react";
 
 // Animations
 import { AnimatePresence, motion } from "framer-motion";
@@ -27,6 +37,7 @@ import { Marker } from "@/types";
 // Custom Components
 import SearchBarDirection from "./_components/search-bar-direction";
 import Map from "./_components/map";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const MapPage: React.FC = () => {
   const [showModalNewMarker, setShowModalNewMarker] = useState(false);
@@ -72,6 +83,33 @@ const MapPage: React.FC = () => {
     lng: -75.49279797287063,
   });
   const [locationPermission, setLocationPermission] = useState(false);
+  const [selectedTravelMode, setSelectedTravelMode] =
+    useState<TravelMode>(google.maps.TravelMode.DRIVING);
+
+  type TravelMode = google.maps.TravelMode;
+
+  const travelModes: {
+    value: google.maps.TravelMode;
+    label: string;
+    icon: React.ReactNode;
+  }[] = [
+    {
+      value: google.maps.TravelMode.BICYCLING,
+      label: "Bicicleta",
+      icon: <BikeIcon className="mr-2 h-4 w-4" />,
+    },
+    {
+      value: google.maps.TravelMode.WALKING,
+      label: "Caminar",
+      icon: <FootprintsIcon className="mr-2 h-4 w-4" />,
+    },
+    {
+      value: google.maps.TravelMode.DRIVING,
+      label: "Carro",
+      icon: <CarFront className="mr-2 h-4 w-4" />,
+    },
+    { value: google.maps.TravelMode.TRANSIT, label: "Bus", icon: <Bus className="mr-2 h-4 w-4" /> },
+  ];
 
   useEffect(() => {
     if (locationPermission) {
@@ -139,6 +177,10 @@ const MapPage: React.FC = () => {
     }
   }, [locationPermission]);
 
+  const handleModeChange = (mode: string) => {
+    setSelectedTravelMode(mode as TravelMode);
+  };
+
   const fetchDeletingMarker = async (nombre: string | undefined) => {
     try {
       if (nombre) {
@@ -201,9 +243,8 @@ const MapPage: React.FC = () => {
     }
   };
 
-
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
     libraries: ["places"],
   });
 
@@ -238,8 +279,8 @@ const MapPage: React.FC = () => {
                     >
                       <Card>
                         <CardContent>
-                          <h3 className="text-xl font-semibold mb-2 flex gap-2 text-secondary">
-                            <MapPin/>
+                          <h3 className="text-xl font-semibold mb-2 flex gap-2 text-secondary pr-5">
+                            <MapPin />
                             {marker.nombre}
                           </h3>
                           <Separator className="relative bg-primary/50 my-3" />
@@ -274,29 +315,50 @@ const MapPage: React.FC = () => {
           </CardContent>
         </Card>
         <div className="w-full lg:order-2 order-1">
-          {/* Buscador */}
-          <div className=" justify-between gap-3 md:gap-6 pb-3 flex">
-            <div className="w-full  ">
-              <SearchBarDirection
-                onSearchResult={handleSearchResult}
-                onLocationUpdate={(lat: number, lng: number) =>
-                  setDefaultCenter({ lat, lng })
-                }
-              />
+          <div className="flex flex-wrap justify-between gap-3 md:gap-4 pb-3">
+            {/* Primera fila: Buscador y Controles */}
+            <div className="flex flex-1 items-center gap-3 w-full">
+              {/* Buscador */}
+              <div className="flex w-full">
+                <SearchBarDirection
+                  onSearchResult={handleSearchResult}
+                  onLocationUpdate={(lat: number, lng: number) =>
+                    setDefaultCenter({ lat, lng })
+                  }
+                />
+              </div>
+
+              {/* Botones de Geolocalización y Tema */}
+              <div className="flex gap-2">
+                <Button variant={"ghost"} onClick={requestLocationPermission}>
+                  <LocateFixed />
+                  <span className="sm:block hidden">Tu Ubicación</span>
+                </Button>
+                <ThemeToggle />
+              </div>
             </div>
 
-            <div className="flex gap-2">
-              {/* Botón para activar geolocalización */}
-              <Button variant={"ghost"} onClick={requestLocationPermission}>
-                <LocateFixed/>
-                <span className="sm:block hidden">Tu Ubicación</span>
-              </Button>
-              <ThemeToggle />
+            {/* Segunda fila: Tabs */}
+            <div className="w-full xl:w-auto ">
+              <Tabs value={selectedTravelMode} onValueChange={handleModeChange} className="w-full">
+                <TabsList className="w-full md:w-auto">
+                  {travelModes.map((mode) => (
+                    <TabsTrigger
+                      key={mode.value}
+                      value={mode.value}
+                      className="flex items-center"
+                    >
+                      {mode.icon}
+                      {mode.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
             </div>
           </div>
 
-          <div className=" md:mx-0 border border-black shadow-cartoon-small rounded-lg">
-            {/* Mapa */}
+          <div className=" md:mx-0 border border-black shadow-cartoon-small dark:shadow-cartoon-small-dark rounded-lg">
+            {/* Map */}
             <Map
               defaultCenter={defaultCenter}
               markers={markers}
@@ -304,8 +366,8 @@ const MapPage: React.FC = () => {
               setTempMarker={setTempMarker}
               zoom={14}
               zoomShowInfoDistance={14}
-              enableAddMarker={true}
               onModalOpen={handleOpenModalNewMarker}
+              travelMode={selectedTravelMode}
             />
           </div>
         </div>
@@ -386,7 +448,7 @@ const MapPage: React.FC = () => {
                 fetchDeletingMarker(currentMarker?.nombre ?? undefined)
               }
             >
-              <Trash/>
+              <Trash />
               Eliminar
             </Button>
           </div>
