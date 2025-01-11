@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { toast } from "sonner";
 
 interface SearchBarDirectionProps {
   onSearchResult: (
@@ -11,58 +12,72 @@ interface SearchBarDirectionProps {
       duracion: string;
     } | null
   ) => void;
-  onSearchError: (query: string) => void;
   onLocationUpdate: (lat: number, lng: number) => void;
 }
 
 const SearchBarDirection: React.FC<SearchBarDirectionProps> = ({
   onSearchResult,
-  onSearchError,
   onLocationUpdate,
 }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const isErrorHandled = useRef(false); // Flag para manejar el error
 
-  // Inicializa el autocompletado de Google Places al montar el componente
+  const searchError = (notFoundDirection: string) => {
+    toast.error(`La dirección ${notFoundDirection} no fue encontrada en el mapa`, {
+      className:
+        "text-lg border border-primary shadow-cartoon-small-xs dark:shadow-cartoon-small-dark dark:border-black",
+    });
+  };
+
   useEffect(() => {
-    if (inputRef.current && window.google) {
-      const autoCompleteInstance = new google.maps.places.Autocomplete(
-        inputRef.current,
-        {
-          // Elimina restricciones para que busque cualquier tipo de lugar
-          types: [],
-          fields: ["name", "geometry", "place_id", "formatted_address"], // Incluye campos relevantes
-        }
-      );
+    const initializeAutocomplete = () => {
+        // Resetea el flag de error
+        isErrorHandled.current = false;
+      if (inputRef.current && window.google) {
+        const autoCompleteInstance = new google.maps.places.Autocomplete(
+          inputRef.current,
+          {
+            types: [],
+            fields: ["name", "geometry", "place_id", "formatted_address"],
+          }
+        );
 
-      autoCompleteInstance.addListener("place_changed", () => {
-        const place = autoCompleteInstance.getPlace();
-        if (place.geometry) {
-          const location = place.geometry.location;
-          if (location) {
+        autoCompleteInstance.addListener("place_changed", () => {
+          const place = autoCompleteInstance.getPlace();
+          if (place.geometry && place.geometry.location) {
+            const location = place.geometry.location;
             const lat = location.lat();
             const lng = location.lng();
-            onLocationUpdate(lat, lng); // Actualizar ubicación en el mapa
+
+            // Resetea el flag de error
+            isErrorHandled.current = false;
+
+            onLocationUpdate(lat, lng);
             onSearchResult({
               nombre: place.name || "Lugar encontrado",
               latitud: lat,
               longitud: lng,
-              duracion: "0", // Ajusta según lo que necesites
+              duracion: "0",
             });
           } else {
-            onSearchError(inputRef.current?.value || "");
-            if (inputRef.current) {
-              inputRef.current.value = "";
-            }
+            handleSearchError();
           }
-        } else {
-          onSearchError(inputRef.current?.value || "");
-          if (inputRef.current) {
-            inputRef.current.value = "";
-          }
+        });
+      }
+    };
+
+    const handleSearchError = () => {
+      if (!isErrorHandled.current) {
+        isErrorHandled.current = true; // Marca el error como manejado
+        searchError(inputRef.current?.value || "");
+        if (inputRef.current) {
+          inputRef.current.value = "";
         }
-      });
-    }
-  }, [onSearchResult, onSearchError, onLocationUpdate]);
+      }
+    };
+
+    initializeAutocomplete();
+  }, [onSearchResult, onLocationUpdate]);
 
   return (
     <div className="relative flex items-center space-x-4 w-full">

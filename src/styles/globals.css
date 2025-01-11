@@ -100,6 +100,6 @@ scrollbar-width: none;  /* Firefox */
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground dark:bg-[url('/assets/grain-bg.svg')];
   }
 }

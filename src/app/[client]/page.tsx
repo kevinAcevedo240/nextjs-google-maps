@@ -16,7 +16,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import Modal from "@/components/ui/modal";
 
 // Icons
-import { LocateFixed, MapPin, MapPinned, Trash } from "lucide-react";
+import { Earth, LocateFixed, MapPin, MapPinned, Trash } from "lucide-react";
 
 // Animations
 import { AnimatePresence, motion } from "framer-motion";
@@ -26,12 +26,10 @@ import { Marker } from "@/types";
 
 // Custom Components
 import SearchBarDirection from "./_components/search-bar-direction";
-import MapComponent from "./_components/map";
+import Map from "./_components/map";
 
-const MapForm: React.FC = () => {
-  const [showModalAlert, setShowModaAlert] = useState(false);
+const MapPage: React.FC = () => {
   const [showModalNewMarker, setShowModalNewMarker] = useState(false);
-  const [directionSearch, setDirectionSearch] = useState<string>("");
   const [errorNameMessage, setErrorNameMessage] = useState<string>("");
   const [currentMarker, setCurrentMarker] = useState<Marker | undefined>();
   const [confirmDeleting, setConfirmDeleting] = useState(false);
@@ -203,10 +201,6 @@ const MapForm: React.FC = () => {
     }
   };
 
-  const handleSearchError = (query: string) => {
-    setDirectionSearch(query);
-    setShowModaAlert(true);
-  };
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -214,7 +208,12 @@ const MapForm: React.FC = () => {
   });
 
   if (!isLoaded) {
-    return <div className="font-semibold text-2xl">Cargando mapa...</div>;
+    return (
+      <div className="flex flex-col gap-2 items-center justify-center h-screen ">
+        <div className="font-semibold text-2xl">Cargando mapa...</div>
+        <Earth className="size-20 text-secondary" />
+      </div>
+    );
   }
 
   return (
@@ -280,7 +279,6 @@ const MapForm: React.FC = () => {
             <div className="w-full  ">
               <SearchBarDirection
                 onSearchResult={handleSearchResult}
-                onSearchError={handleSearchError}
                 onLocationUpdate={(lat: number, lng: number) =>
                   setDefaultCenter({ lat, lng })
                 }
@@ -290,7 +288,7 @@ const MapForm: React.FC = () => {
             <div className="flex gap-2">
               {/* Botón para activar geolocalización */}
               <Button variant={"ghost"} onClick={requestLocationPermission}>
-                <LocateFixed className="sm:mr-2" />
+                <LocateFixed/>
                 <span className="sm:block hidden">Tu Ubicación</span>
               </Button>
               <ThemeToggle />
@@ -299,37 +297,19 @@ const MapForm: React.FC = () => {
 
           <div className=" md:mx-0 border border-black shadow-cartoon-small rounded-lg">
             {/* Mapa */}
-            <MapComponent
+            <Map
               defaultCenter={defaultCenter}
               markers={markers}
               tempMarker={tempMarker}
               setTempMarker={setTempMarker}
               zoom={14}
               zoomShowInfoDistance={14}
-              theme="light"
               enableAddMarker={true}
               onModalOpen={handleOpenModalNewMarker}
             />
           </div>
         </div>
       </div>
-
-      {/* modal alert direction not found */}
-      <Modal openModal={showModalAlert} setShowModal={setShowModaAlert}>
-        <h2 className="text-2xl md:text-3xl text-primary font-semibold">
-          Mapa Dirección
-        </h2>
-        <Separator className="my-3" />
-
-        <div className="my-2 space-y-2">
-          <p className="text-lg">
-            La dirección {directionSearch} no fue encontrada en el mapa
-          </p>
-          <Button variant={"outline"} onClick={() => setShowModaAlert(false)}>
-            Aceptar
-          </Button>
-        </div>
-      </Modal>
 
       {/* Add marker name modal */}
       <Modal
@@ -406,7 +386,7 @@ const MapForm: React.FC = () => {
                 fetchDeletingMarker(currentMarker?.nombre ?? undefined)
               }
             >
-              <Trash className="mr-2" size={20} />
+              <Trash/>
               Eliminar
             </Button>
           </div>
@@ -416,4 +396,4 @@ const MapForm: React.FC = () => {
   );
 };
 
-export default MapForm;
+export default MapPage;

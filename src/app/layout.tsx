@@ -14,8 +14,8 @@ import { ThemeProvider } from "@/providers/theme-provider";
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 export const metadata: Metadata = {
-  title: "Bobs Corn",
-  description: "Technical Test",
+  title: "NextJs + Google Maps",
+  description: "NextJs + Google Maps tutorial",
 };
 
 export default function RootLayout({
@@ -25,18 +25,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${poppins.className} antialiased dark:bg-[url('/assets/grain-bg.svg')] `}
-      >
-         <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            
-          >
-            {children}
-            
-          </ThemeProvider>
+      <body className={`${poppins.className} antialiased  `}>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

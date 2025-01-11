@@ -12,19 +12,18 @@ import { Marker } from "@/types";
 import GoogleMapsIcon from "@/components/ui/icons/google-maps-icon";
 import WazeIcon from "@/components/ui/icons/waze-icon";
 
-interface MapComponentProps {
+interface MapProps {
   defaultCenter: { lat: number; lng: number };
   markers: Marker[];
   tempMarker?: Marker | null;
   setTempMarker?: React.Dispatch<React.SetStateAction<Marker | null>>;
   zoom: number;
   zoomShowInfoDistance?: number;
-  theme: "dark" | "light";
   enableAddMarker?: boolean;
   onModalOpen?: () => void;
 }
 
-const MapComponent: React.FC<MapComponentProps> = ({
+const Map: React.FC<MapProps> = ({
   defaultCenter,
   markers,
   tempMarker,
@@ -250,10 +249,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <Button
             variant={"outline"}
             className="dark:shadow-cartoon-small-xs"
-            onClick={() => {
-            //   e.stopPropagation();
-              onModalOpen?.();
-            }}
+            onClick={onModalOpen}
             type="button"
             disabled={!tempMarker}
           >
@@ -282,4 +278,4 @@ const MapComponent: React.FC<MapComponentProps> = ({
   );
 };
 
-export default MapComponent;
+export default Map;
