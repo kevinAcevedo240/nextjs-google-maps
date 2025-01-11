@@ -5,8 +5,10 @@ import { Toaster } from "sonner";
 export default function Home() {
   return (
     <>
-      <ClientPage />
-      <Toaster />
+      <div className="m-5">
+        <ClientPage />
+        <Toaster />
+      </div>
     </>
   );
 }

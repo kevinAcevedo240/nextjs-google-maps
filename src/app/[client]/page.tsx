@@ -144,10 +144,10 @@ const MapForm: React.FC= () => {
     setcurrentPoint(current);
   };
 
-  // const handleOpenDeleteIncident = (current: Novedad) => {
-  //   setConfirmDeletingIncident(true);
-  //   setCurrentNovedad(current);
-  // };
+   const handleOpenDeleteIncident = (current: Novedad) => {
+     setConfirmDeletingIncident(true);
+     setCurrentNovedad(current);
+   };
 
   // const handleOpenModalAndSetCurrentNovedad = (current: Novedad) => {
   //   setShowModalNewIncident(true);
@@ -179,6 +179,7 @@ const MapForm: React.FC= () => {
       incidents.push(nuevaNovedad);
     }
     setIncidents(incidents);
+    console.log(incidents);
     // setValue("novedades", novedades);
   };
 
@@ -186,6 +187,11 @@ const MapForm: React.FC= () => {
   //   handleOpenModalAndSetCurrentNovedad,
   //   handleOpenDeleteIncident
   // );
+
+  const handleOpenModalNewIncident = () => {
+    setShowModalNewIncident(true)
+    setCurrentNovedad(undefined);
+  };
 
   const handleOpenModalNewMarker = () => {
     if (!tempMarker) return;
@@ -306,6 +312,54 @@ const MapForm: React.FC= () => {
                 <TriangleAlert />
                 Novedades
               </Label>
+
+              <Button
+                variant={"outline"}
+                // className="dark:text-black  ml-0 sm:ml-2 md:mx-0 text-white text-lg p-3 sm:p-4 transition-all hover:scale-110 active:scale-95 rounded-lg dark:bg-white dark:hover:shadow-custom-white hover:bg-black hover:text-white bg-black"
+                onClick={handleOpenModalNewIncident}
+              >
+                <LocateFixed className="sm:mr-2" />
+                Nuevo incidente
+              </Button>
+              <AnimatePresence>
+                {incidents?.map((incident, index) => (
+                  <motion.div
+                    key={incident.id || index}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Card className="bg-white dark:bg-black/30 mb-4 rounded-lg border border-black dark:border-white pt-2 shadow-cartoon-small dark:shadow-cartoon-small-dark relative">
+                      <CardContent>
+                        <h3 className="text-xl font-semibold mb-2 flex gap-2">
+                          <MapPin />
+                          {incident.nombre}
+                        </h3>
+                        <Separator className="relative bg-black/30 my-3 dark:bg-white" />
+                        <div className="flex gap-2 mb-2">
+                          <p className="text-wrap break-words w-1/2">
+                            <strong>Latitud:</strong> {incident.latitud}
+                          </p>
+                          <p className="text-wrap break-words w-1/2">
+                            <strong>Longitud:</strong> {incident.longitud}
+                          </p>
+                        </div>
+                        <p>
+                          <strong>Duración:</strong> {incident.duracion}
+                        </p>
+                        <p>
+                          <strong>Tipo:</strong> {incident.tipo}
+                        </p>
+                        <Trash
+                          className="absolute top-3 right-3 cursor-pointer text-destructive hover:scale-110 transition-all"
+                          onClick={() => handleOpenDeleteIncident(incident)}
+                        />
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
               {/* <DataTable
                 columns={columnsNovedades}
                 data={getValues("novedades") || []}
@@ -329,17 +383,19 @@ const MapForm: React.FC= () => {
           <div className=" justify-between gap-3 md:gap-6 pb-3 flex">
             <div className="w-full  ">
               <SearchBarDirection
-              onSearchResult={handleSearchResult}
-              onSearchError={handleSearchError}
-              onLocationUpdate={(lat: number, lng: number) => setDefaultCenter({ lat, lng })}
+                onSearchResult={handleSearchResult}
+                onSearchError={handleSearchError}
+                onLocationUpdate={(lat: number, lng: number) =>
+                  setDefaultCenter({ lat, lng })
+                }
               />
             </div>
 
             <div className="flex gap-2">
               {/* Botón para activar geolocalización */}
               <Button
-                variant={"ghost"}
-                className="dark:text-black  ml-0 sm:ml-2 md:mx-0 text-white text-lg p-3 sm:p-4 transition-all hover:scale-110 active:scale-95 rounded-lg dark:bg-white dark:hover:shadow-custom-white hover:bg-black hover:text-white bg-black"
+                variant={"outline"}
+                // className="dark:text-black  ml-0 sm:ml-2 md:mx-0 text-white text-lg p-3 sm:p-4 transition-all hover:scale-110 active:scale-95 rounded-lg dark:bg-white dark:hover:shadow-custom-white hover:bg-black hover:text-white bg-black"
                 onClick={requestLocationPermission}
               >
                 <LocateFixed className="sm:mr-2" />
@@ -354,7 +410,7 @@ const MapForm: React.FC= () => {
             <MapComponent
               defaultCenter={defaultCenter}
               markers={markers}
-              novedades={incidents|| []}
+              novedades={incidents || []}
               tempMarker={tempMarker}
               setTempMarker={setTempMarker}
               zoom={14}
@@ -399,7 +455,7 @@ const MapForm: React.FC= () => {
         </div>
       </Modal>
 
-      {/* Add point name modal */}
+      {/* Add marker name modal */}
       <Modal
         openModal={showModalNewPoint}
         setShowModal={setShowModalNewPoint}
@@ -457,7 +513,7 @@ const MapForm: React.FC= () => {
         </div>
       </Modal>
 
-      {/* Add novedad modal */}
+      {/* Add incident modal */}
       <Modal
         openModal={showModalNewIncident}
         setShowModal={setShowModalNewIncident}
@@ -478,7 +534,7 @@ const MapForm: React.FC= () => {
         />
       </Modal>
 
-      {/* Modal confirm delete point */}
+      {/* Modal confirm delete marker */}
       <Modal
         openModal={confirmDeleting}
         setShowModal={setConfirmDeleting}
@@ -507,10 +563,7 @@ const MapForm: React.FC= () => {
               <Trash className="mr-2" size={20} />
               Eliminar
             </Button>
-            <Button
-              variant={"ghost"}
-              onClick={() => setConfirmDeleting(false)}
-            >
+            <Button variant={"ghost"} onClick={() => setConfirmDeleting(false)}>
               Cancelar
             </Button>
           </div>
