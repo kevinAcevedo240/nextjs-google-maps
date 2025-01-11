@@ -312,7 +312,7 @@ const MapPage: React.FC = () => {
             </div>
 
             {/* Segunda fila: Tabs */}
-            <div className="w-full xl:w-auto ">
+            <div className="w-full xl:w-auto">
               <Tabs
                 value={selectedTravelMode}
                 onValueChange={handleModeChange}
