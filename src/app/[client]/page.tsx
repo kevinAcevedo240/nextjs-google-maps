@@ -155,7 +155,7 @@ const MapPage: React.FC = () => {
     <>
       <div className="flex lg:flex-row flex-col gap-4">
         <Card className="lg:order-1 order-2 overflow-y-scroll h-[80vh] md:h-[95vh]">
-          <CardContent className="space-y-4 ">
+          <CardContent className="space-y-4 px-4">
             <Label className="flex gap-2">
               <MapPinned />
               Puntos
