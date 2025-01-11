@@ -1,31 +1,39 @@
-'use client'
+"use client";
 
+// React and Hooks
 import React, { useEffect, useState } from "react";
+
+// Google Maps API
 import { useJsApiLoader } from "@react-google-maps/api";
 
-// import DataTable from "@/components/shared/dataTable/data-table";
+// UI Components
 import { Button } from "@/components/ui/button";
-import { LocateFixed, MapPin, MapPinned, Trash } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-
-// import { AsignacionNovedadesTableColumns } from "@/modules/rutas/adapters/columns-novedades";
-import { AnimatePresence, motion } from "framer-motion";
-import { Marker } from "@/types";
-import Modal from "@/components/ui/modal";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import Modal from "@/components/ui/modal";
+
+// Icons
+import { LocateFixed, MapPin, MapPinned, Trash } from "lucide-react";
+
+// Animations
+import { AnimatePresence, motion } from "framer-motion";
+
+// Types
+import { Marker } from "@/types";
+
+// Custom Components
 import SearchBarDirection from "./_components/search-bar-direction";
 import MapComponent from "./_components/map";
 
-
-const MapForm: React.FC= () => {
+const MapForm: React.FC = () => {
   const [showModalAlert, setShowModaAlert] = useState(false);
   const [showModalNewPoint, setShowModalNewPoint] = useState(false);
   const [directionSearch, setDirectionSearch] = useState<string>("");
   const [errorNameMessage, setErrorNameMessage] = useState<string>("");
-  const [currentPoint, setcurrentPoint] = useState<Marker | undefined>();
+  const [currentMarker, setCurrentMarker] = useState<Marker | undefined>();
   const [confirmDeleting, setConfirmDeleting] = useState(false);
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [tempMarker, setTempMarker] = useState<Marker | null>(null);
@@ -99,12 +107,14 @@ const MapForm: React.FC= () => {
         options
       );
     }
-  }, [ locationPermission]);
+  }, [locationPermission]);
 
   const fetchDeletingMarker = async (nombre: string | undefined) => {
     try {
       if (nombre) {
-        setMarkers(markers.filter((Marker: Marker) => Marker.nombre !== nombre));
+        setMarkers(
+          markers.filter((Marker: Marker) => Marker.nombre !== nombre)
+        );
       }
       setConfirmDeleting(false);
     } catch (error) {
@@ -114,9 +124,8 @@ const MapForm: React.FC= () => {
 
   const handleOpenDeletePoint = (current: Marker) => {
     setConfirmDeleting(true);
-    setcurrentPoint(current);
+    setCurrentMarker(current);
   };
-
 
   const handleOpenModalNewMarker = () => {
     if (!tempMarker) return;
@@ -179,19 +188,18 @@ const MapForm: React.FC= () => {
   return (
     <>
       <div className=" flex lg:flex-row flex-col gap-4">
-        
         <Card className="bg-white lg:h-[95vh] dark:bg-black/30 rounded-lg border-black/10 pt-4 overflow-auto  lg:w-1/3  md:mx-0 md:mb-0  lg:order-1 order-2 z-10 border border-black dark:border-white shadow-cartoon-small dark:shadow-cartoon-small-dark ">
           <CardContent className=" space-y-5">
             <Label className="text-xl my-3 flex gap-2">
               <MapPinned />
-              Markers
+              Puntos
             </Label>
-            {markers.length > 0 && (
+            {markers.length > 0 ? (
               <>
                 <AnimatePresence>
                   {markers.map((marker, index) => (
                     <motion.div
-                      key={index} // Asegúrate de usar un ID único si es posible
+                      key={index}
                       initial={{ opacity: 0, y: -20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 20 }}
@@ -226,8 +234,11 @@ const MapForm: React.FC= () => {
                     </motion.div>
                   ))}
                 </AnimatePresence>
-                <Separator className="relative bg-black/40 dark:bg-white " />
               </>
+            ) : (
+              <p className="text-primary text-base md:text-xl text-center mt-4 border-2 border-dashed py-3 rounded-lg">
+                No hay puntos creados aún.
+              </p>
             )}
           </CardContent>
         </Card>
@@ -246,11 +257,7 @@ const MapForm: React.FC= () => {
 
             <div className="flex gap-2">
               {/* Botón para activar geolocalización */}
-              <Button
-                variant={"outline"}
-                // className="dark:text-black  ml-0 sm:ml-2 md:mx-0 text-white text-lg p-3 sm:p-4 transition-all hover:scale-110 active:scale-95 rounded-lg dark:bg-white dark:hover:shadow-custom-white hover:bg-black hover:text-white bg-black"
-                onClick={requestLocationPermission}
-              >
+              <Button variant={"ghost"} onClick={requestLocationPermission}>
                 <LocateFixed className="sm:mr-2" />
                 <span className="sm:block hidden">Tu Ubicación</span>
               </Button>
@@ -309,14 +316,14 @@ const MapForm: React.FC= () => {
         maxWidth="md:max-w-[50%] xl:max-w-[30%]"
       >
         <h2 className="text-2xl md:text-3xl text-neutral-600 dark:text-white font-bold text-center mb-4 max-w-xl">
-          Nuevo Marker{" "}
+          Nuevo Punto{" "}
         </h2>
         <Separator
           className={"relative bg-border mb-3 dashboard-header-highlight"}
         />
         <div className="my-2">
           <p className="text-muted-foreground mb-3">
-            Indica el nombre de el Marker seleccionado
+            Indica el nombre de el punto seleccionado
           </p>
 
           <div className="space-y-1">
@@ -327,7 +334,7 @@ const MapForm: React.FC= () => {
                 setTempMarker((prev: Marker | null) =>
                   prev ? { ...prev, nombre: e.target.value || "" } : null
                 );
-                setErrorNameMessage(""); // Clear error message when typing
+                setErrorNameMessage(""); // Limpiar mensaje de error
               }}
               type="text"
               onKeyDown={(e) => {
@@ -354,7 +361,7 @@ const MapForm: React.FC= () => {
               variant={"outline"}
               onClick={() => handleAddMarker()}
             >
-              Añadir Marker
+              Añadir Punto
             </Button>
           </div>
         </div>
@@ -366,31 +373,26 @@ const MapForm: React.FC= () => {
         setShowModal={setConfirmDeleting}
         maxWidth="md:max-w-[50%] xl:max-w-[30%]"
       >
-        <h2 className="text-2xl md:text-3xl text-neutral-600 dark:text-white font-bold text-center mb-4 max-w-xl">
-          Eliminar{" "}
-          <span className="px-1 py-0.5 rounded-md bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-black/40 ">
-            {currentPoint?.nombre}
-          </span>
+        <h2 className="text-2xl md:text-3xl text-primary font-semibold">
+          Eliminar &quot;{currentMarker?.nombre}&quot;
         </h2>
-        <Separator
-          className={"relative bg-border mb-3 dashboard-header-highlight"}
-        />
+        <Separator className="my-3" />
         <div className="my-2">
           <p className="text-lg">
-            ¿Estás seguro que deseas eliminar este Marker?
+            ¿Estás seguro que deseas eliminar este Punto?
           </p>
-          <div className="flex my-4 gap-5">
+          <div className="flex my-4 gap-5 justify-end">
+            <Button variant={"ghost"} onClick={() => setConfirmDeleting(false)}>
+              Cancelar
+            </Button>
             <Button
               variant={"destructive"}
               onClick={() =>
-                fetchDeletingMarker(currentPoint?.nombre ?? undefined)
+                fetchDeletingMarker(currentMarker?.nombre ?? undefined)
               }
             >
               <Trash className="mr-2" size={20} />
               Eliminar
-            </Button>
-            <Button variant={"ghost"} onClick={() => setConfirmDeleting(false)}>
-              Cancelar
             </Button>
           </div>
         </div>
