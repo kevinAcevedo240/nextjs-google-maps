@@ -242,46 +242,44 @@ const MapPage: React.FC = () => {
               Puntos
             </Label>
             {markers.length > 0 ? (
-              <>
-                <AnimatePresence>
-                  {markers.map((marker, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 20 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <Card>
-                        <CardContent>
-                          <h3 className="text-xl font-semibold mb-2 flex gap-2 text-secondary pr-5">
-                            <MapPin />
-                            {marker.nombre}
-                          </h3>
-                          <Separator className="relative bg-primary/50 my-3" />
-                          <div className="flex gap-2 mb-2">
-                            <p className="text-wrap break-words w-1/2">
-                              <strong>Latitud:</strong> {marker.latitud}
-                            </p>
-                            <p className="text-wrap break-words w-1/2">
-                              <strong>Longitud:</strong> {marker.longitud}
-                            </p>
-                          </div>
-                          {marker.direccion && (
-                            <p>
-                              <strong>Dirección:</strong> {marker.direccion}
-                            </p>
-                          )}
-                          <Trash
-                            className="absolute top-3 right-3 size-8 p-1 rounded-lg shadow-cartoon-small-xs dark:shadow-cartoon-small-xs-dark cursor-pointer border border-primary  bg-destructive text-white hover:scale-110 transition-all"
-                            onClick={() => handleOpenDeleteMarker(marker)}
-                          />
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </>
+              <AnimatePresence>
+                {markers.map((marker, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Card>
+                      <CardContent>
+                        <h3 className="text-xl font-semibold mb-2 flex gap-2 text-secondary pr-5">
+                          <MapPin />
+                          {marker.nombre}
+                        </h3>
+                        <Separator className="relative bg-primary/50 my-3" />
+                        <div className="flex gap-2 mb-2">
+                          <p className="text-wrap break-words w-1/2">
+                            <strong>Latitud:</strong> {marker.latitud}
+                          </p>
+                          <p className="text-wrap break-words w-1/2">
+                            <strong>Longitud:</strong> {marker.longitud}
+                          </p>
+                        </div>
+                        {marker.direccion && (
+                          <p>
+                            <strong>Dirección:</strong> {marker.direccion}
+                          </p>
+                        )}
+                        <Trash
+                          className="absolute top-3 right-3 size-8 p-1 rounded-lg shadow-cartoon-small-xs dark:shadow-cartoon-small-xs-dark cursor-pointer border border-primary  bg-destructive text-white hover:scale-110 transition-all"
+                          onClick={() => handleOpenDeleteMarker(marker)}
+                        />
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             ) : (
               <p className="text-primary text-base md:text-xl text-center mt-4 border-2 border-dashed py-3 rounded-lg">
                 No hay puntos creados aún.
@@ -315,13 +313,17 @@ const MapPage: React.FC = () => {
 
             {/* Segunda fila: Tabs */}
             <div className="w-full xl:w-auto ">
-              <Tabs value={selectedTravelMode} onValueChange={handleModeChange} className="w-full">
-                <TabsList className="w-full md:w-auto">
+              <Tabs
+                value={selectedTravelMode}
+                onValueChange={handleModeChange}
+                className="w-full"
+              >
+                <TabsList className="w-full md:w-auto h-14 sm:h-auto">
                   {travelModes.map((mode) => (
                     <TabsTrigger
                       key={mode.value}
                       value={mode.value}
-                      className="flex items-center gap-1"
+                      className="flex items-center sm:gap-1 sm:flex-row flex-col"
                     >
                       {mode.icon}
                       {mode.label}
