@@ -1,17 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
 import { toast } from "sonner";
+import { Marker } from "@/types";
 
 interface SearchBarDirectionProps {
-  onSearchResult: (
-    result: {
-      nombre: string;
-      latitud: number;
-      longitud: number;
-      duracion: string;
-    } | null
-  ) => void;
+  onSearchResult: (result: Marker | null) => void;
   onLocationUpdate: (lat: number, lng: number) => void;
 }
 
@@ -54,10 +47,9 @@ const SearchBarDirection: React.FC<SearchBarDirectionProps> = ({
 
             onLocationUpdate(lat, lng);
             onSearchResult({
-              nombre: place.name || "Lugar encontrado",
-              latitud: lat,
-              longitud: lng,
-              duracion: "0",
+              name: place.name || "Lugar encontrado",
+              latitude: lat,
+              longitude: lng,
             });
           } else {
             handleSearchError();
@@ -79,19 +71,7 @@ const SearchBarDirection: React.FC<SearchBarDirectionProps> = ({
     initializeAutocomplete();
   }, [onSearchResult, onLocationUpdate]);
 
-  return (
-    <div className="relative flex items-center space-x-4 w-full">
-      <Input
-        ref={inputRef}
-        type="text"
-        placeholder="Buscar dirección..."
-        className="border border-black dark:border-white/50 p-2 shadow-cartoon-small-xs dark:shadow-cartoon-small-xs-dark rounded-lg w-full placeholder:text-base"
-      />
-      <span className="absolute right-3">
-        <Search />
-      </span>
-    </div>
-  );
+  return <Input ref={inputRef} type="text" placeholder="Buscar dirección..." />;
 };
 
 export default SearchBarDirection;

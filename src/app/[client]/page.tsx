@@ -1,7 +1,7 @@
 "use client";
 
 // React and Hooks
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 // Google Maps API
 import { useJsApiLoader } from "@react-google-maps/api";
@@ -18,7 +18,7 @@ import Modal from "@/components/ui/modal";
 // Icons
 import {
   Earth,
-  LocateFixed,
+  // LocateFixed,
   MapPinned,
   Trash,
 } from "lucide-react";
@@ -35,6 +35,7 @@ import Map from "./_components/map";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { travelModes } from "@/lib/travelModesConfig";
 import MarkerCard from "./_components/marker-card";
+import CurrentLocation from "./_components/current-location";
 
 const MapPage: React.FC = () => {
   const [showModalNewMarker, setShowModalNewMarker] = useState(false);
@@ -43,34 +44,34 @@ const MapPage: React.FC = () => {
   const [confirmDeleting, setConfirmDeleting] = useState(false);
   const [markers, setMarkers] = useState<Marker[]>([
     {
-      nombre: "Parque de la 93",
-      latitud: 4.676054,
-      longitud: -74.048073,
-      direccion: "Calle 93A #13-25, Bogotá, Colombia",
+      name: "Parque de la 93",
+      latitude: 4.676054,
+      longitude: -74.048073,
+      address: "Calle 93A #13-25, Bogotá, Colombia",
     },
     {
-      nombre: "Zona T",
-      latitud: 4.668889,
-      longitud: -74.052358,
-      direccion: "Carrera 12a #83-61, Bogotá, Colombia",
+      name: "Zona T",
+      latitude: 4.668889,
+      longitude: -74.052358,
+      address: "Carrera 12a #83-61, Bogotá, Colombia",
     },
     {
-      nombre: "Andino Shopping Mall",
-      latitud: 4.667423,
-      longitud: -74.051736,
-      direccion: "Carrera 11 #82-71, Bogotá, Colombia",
+      name: "Centro Comercial Andino",
+      latitude: 4.667423,
+      longitude: -74.051736,
+      address: "Carrera 11 #82-71, Bogotá, Colombia",
     },
     {
-      nombre: "Museo Nacional de Colombia",
-      latitud: 4.615734,
-      longitud: -74.070243,
-      direccion: "Carrera 7 #28-66, Bogotá, Colombia",
+      name: "Museo Nacional de Colombia",
+      latitude: 4.615734,
+      longitude: -74.070243,
+      address: "Carrera 7 #28-66, Bogotá, Colombia",
     },
     {
-      nombre: "Monserrate",
-      latitud: 4.605965,
-      longitud: -74.058094,
-      direccion: "Cerro de Monserrate, Bogotá, Colombia",
+      name: "Monserrate",
+      latitude: 4.605965,
+      longitude: -74.058094,
+      address: "Cerro de Monserrate, Bogotá, Colombia",
     },
   ]);
   const [tempMarker, setTempMarker] = useState<Marker | null>(null);
@@ -78,90 +79,19 @@ const MapPage: React.FC = () => {
     lat: 5.051976778133077,
     lng: -75.49279797287063,
   });
-  const [locationPermission, setLocationPermission] = useState(false);
   const [selectedTravelMode, setSelectedTravelMode] =
     useState<string>("DRIVING");
 
   type TravelMode = google.maps.TravelMode;
 
-
-  useEffect(() => {
-    if (locationPermission) {
-      // Si el usuario activa la geolocalización, obtener su ubicación
-      const options = {
-        enableHighAccuracy: true, // Mayor precisión
-        timeout: 10000, // Máximo 10 segundos para obtener la ubicación
-        maximumAge: 0, // Evita usar ubicaciones en caché
-      };
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-
-          setDefaultCenter({
-            lat: latitude,
-            lng: longitude,
-          });
-
-          const geocoder = new google.maps.Geocoder();
-          geocoder.geocode(
-            {
-              location: { lat: latitude, lng: longitude },
-            },
-            (results, status) => {
-              if (status === "OK" && results && results[0]) {
-                setTempMarker({
-                  nombre: "",
-                  latitud: latitude,
-                  longitud: longitude,
-                  direccion: results[0].formatted_address,
-                });
-              } else {
-                console.error("Geocode error: ", status);
-                setTempMarker({
-                  nombre: "",
-                  latitud: latitude,
-                  longitud: longitude,
-                  direccion: "",
-                });
-              }
-            }
-          );
-        },
-        (error) => {
-          console.error("Geolocation error: ", error.message);
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              console.log("Permiso denegado por el usuario.");
-              break;
-            case error.POSITION_UNAVAILABLE:
-              console.log("Información de ubicación no disponible.");
-              break;
-            case error.TIMEOUT:
-              console.log(
-                "Tiempo de espera agotado para obtener la ubicación."
-              );
-              break;
-            default:
-              console.log("Error desconocido al obtener la ubicación.");
-          }
-        },
-        options
-      );
-    }
-  }, [locationPermission]);
-
-
   const handleModeChange = (mode: string) => {
     setSelectedTravelMode(mode as TravelMode);
   };
 
-  const fetchDeletingMarker = async (nombre: string | undefined) => {
+  const fetchDeletingMarker = async (name: string | undefined) => {
     try {
-      if (nombre) {
-        setMarkers(
-          markers.filter((Marker: Marker) => Marker.nombre !== nombre)
-        );
+      if (name) {
+        setMarkers(markers.filter((Marker: Marker) => Marker.name !== name));
       }
       setConfirmDeleting(false);
     } catch (error) {
@@ -183,13 +113,13 @@ const MapPage: React.FC = () => {
   const handleAddMarker = () => {
     if (!tempMarker) return;
 
-    if (!tempMarker.nombre) {
+    if (!tempMarker.name) {
       setErrorNameMessage("El Nombre es obligatorio.");
       return;
     }
 
     const nameExists = markers.some(
-      (marker) => marker.nombre === tempMarker.nombre
+      (marker) => marker.name === tempMarker.name
     );
     if (nameExists) {
       setErrorNameMessage("El Nombre ya existe. Por favor, elige otro nombre.");
@@ -201,18 +131,16 @@ const MapPage: React.FC = () => {
     setShowModalNewMarker(false);
   };
 
-  const requestLocationPermission = () => {
-    setLocationPermission(true);
+  const handleCurrentLocation = (data: Marker) => {
+    setDefaultCenter({
+      lat: data.latitude,
+      lng: data.longitude,
+    });
+
+    setTempMarker(data);
   };
 
-  const handleSearchResult = (
-    result: {
-      nombre: string;
-      latitud: number;
-      longitud: number;
-      duracion: string;
-    } | null
-  ) => {
+  const handleSearchResult = (result: Marker | null) => {
     if (result) {
       setTempMarker(result);
     }
@@ -226,7 +154,9 @@ const MapPage: React.FC = () => {
   if (!isLoaded) {
     return (
       <div className="flex flex-col gap-2 items-center justify-center h-screen ">
-        <div className="font-semibold text-2xl animate-pulse">Cargando mapa...</div>
+        <div className="font-semibold text-2xl animate-pulse">
+          Cargando mapa...
+        </div>
         <Earth className="size-20 text-secondary" />
       </div>
     );
@@ -244,7 +174,11 @@ const MapPage: React.FC = () => {
             {markers.length > 0 ? (
               <AnimatePresence>
                 {markers.map((marker, index) => (
-                  <MarkerCard marker={marker} key={index} onDelete={handleOpenDeleteMarker}/>
+                  <MarkerCard
+                    marker={marker}
+                    key={index}
+                    onDelete={handleOpenDeleteMarker}
+                  />
                 ))}
               </AnimatePresence>
             ) : (
@@ -270,10 +204,7 @@ const MapPage: React.FC = () => {
 
               {/* Botones de Geolocalización y Tema */}
               <div className="flex gap-2">
-                <Button variant={"ghost"} onClick={requestLocationPermission}>
-                  <LocateFixed />
-                  <span className="sm:block hidden">Tu Ubicación</span>
-                </Button>
+                <CurrentLocation onLocationUpdate={handleCurrentLocation} />
                 <ThemeToggle />
               </div>
             </div>
@@ -334,7 +265,7 @@ const MapPage: React.FC = () => {
           <div className="space-y-1">
             <Label>Nombre </Label>
             <Input
-              value={tempMarker?.nombre}
+              value={tempMarker?.name}
               onChange={(e) => {
                 setTempMarker((prev: Marker | null) =>
                   prev ? { ...prev, nombre: e.target.value || "" } : null
@@ -375,7 +306,7 @@ const MapPage: React.FC = () => {
       {/* Modal confirm delete marker */}
       <Modal openModal={confirmDeleting} setShowModal={setConfirmDeleting}>
         <h2 className="text-2xl md:text-3xl text-primary font-semibold">
-          Eliminar &quot;{currentMarker?.nombre}&quot;
+          Eliminar &quot;{currentMarker?.name}&quot;
         </h2>
         <Separator className="my-3" />
         <div className="my-2">
@@ -389,7 +320,7 @@ const MapPage: React.FC = () => {
             <Button
               variant={"destructive"}
               onClick={() =>
-                fetchDeletingMarker(currentMarker?.nombre ?? undefined)
+                fetchDeletingMarker(currentMarker?.name ?? undefined)
               }
             >
               <Trash />

@@ -21,20 +21,20 @@ const MarkerCard: React.FC<MarkerCardProps> = ({ marker, onDelete }) => {
         <CardContent>
           <h3 className="text-xl font-semibold mb-2 flex gap-2 text-secondary pr-5">
             <MapPin />
-            {marker.nombre}
+            {marker.name}
           </h3>
           <Separator className="relative bg-primary/50 my-3" />
           <div className="flex gap-2 mb-2">
             <p className="text-wrap break-words w-1/2">
-              <strong>Latitud:</strong> {marker.latitud}
+              <strong>Latitud:</strong> {marker.latitude}
             </p>
             <p className="text-wrap break-words w-1/2">
-              <strong>Longitud:</strong> {marker.longitud}
+              <strong>Longitud:</strong> {marker.longitude}
             </p>
           </div>
-          {marker.direccion && (
+          {marker.address && (
             <p>
-              <strong>Dirección:</strong> {marker.direccion}
+              <strong>Dirección:</strong> {marker.address}
             </p>
           )}
           <Trash

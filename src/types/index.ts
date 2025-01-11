@@ -1,9 +1,9 @@
 
 export type Marker = {
-    nombre: string;
-    latitud: number;
-    longitud: number;
-    direccion?: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+    address?: string;
 };
 
 

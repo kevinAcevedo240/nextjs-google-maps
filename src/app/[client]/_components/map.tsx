@@ -89,16 +89,16 @@ const Map: React.FC<MapProps> = ({
 
     // Crear waypoints desde los marcadores intermedios.
     const waypoints = markers.slice(1, -1).map((marker) => ({
-      location: { lat: marker.latitud, lng: marker.longitud },
+      location: { lat: marker.latitude, lng: marker.longitude },
       stopover: true,
     }));
 
     try {
       const results = await directionsService.route({
-        origin: { lat: markers[0].latitud, lng: markers[0].longitud },
+        origin: { lat: markers[0].latitude, lng: markers[0].longitude },
         destination: {
-          lat: markers[markers.length - 1].latitud,
-          lng: markers[markers.length - 1].longitud,
+          lat: markers[markers.length - 1].latitude,
+          lng: markers[markers.length - 1].longitude,
         },
         waypoints: waypoints,
         travelMode: getGoogleTravelMode(travelMode),
@@ -130,18 +130,18 @@ const Map: React.FC<MapProps> = ({
     geocoder.geocode({ location: { lat, lng } }, (results, status) => {
       if (status === "OK" && results && results[0]) {
         setTempMarker?.({
-          nombre: "",
-          latitud: lat,
-          longitud: lng,
-          direccion: results[0].formatted_address,
+          name: "",
+          latitude: lat,
+          longitude: lng,
+          address: results[0].formatted_address,
         });
       } else {
         console.error("Geocode error: ", status);
         setTempMarker?.({
-          nombre: "",
-          latitud: lat,
-          longitud: lng,
-          direccion: "",
+          name: "",
+          latitude: lat,
+          longitude: lng,
+          address: "",
         });
       }
     });
@@ -165,7 +165,7 @@ const Map: React.FC<MapProps> = ({
       {markers.map((marker, index) => (
         <GoogleMarker
           key={index}
-          position={{ lat: marker.latitud, lng: marker.longitud }}
+          position={{ lat: marker.latitude, lng: marker.longitude }}
           onClick={() => {
             setSelectedMarker(marker);
           }}
@@ -222,7 +222,7 @@ const Map: React.FC<MapProps> = ({
       {tempMarker && (
         <GoogleMarker
           icon={"/assets/custom-temp-marker.svg"}
-          position={{ lat: tempMarker.latitud, lng: tempMarker.longitud }}
+          position={{ lat: tempMarker.latitude, lng: tempMarker.longitude }}
           onClick={() => setTempMarker?.(null)}
         />
       )}
@@ -230,21 +230,21 @@ const Map: React.FC<MapProps> = ({
       {selectedMarker && (
         <InfoWindow
           position={{
-            lat: selectedMarker.latitud,
-            lng: selectedMarker.longitud,
+            lat: selectedMarker.latitude,
+            lng: selectedMarker.longitude,
           }}
           onCloseClick={() => setSelectedMarker(null)}
         >
           <div className="mt-2">
             <h3 className="text-lg font-semibold text-black">
-              {selectedMarker.nombre}
+              {selectedMarker.name}
             </h3>
             <p className="text-muted-foreground text-sm mb-3 mr-2  w-64">
-              {selectedMarker.direccion || "dirección no encontrada"}
+              {selectedMarker.address || "dirección no encontrada"}
             </p>
             <div className="flex gap-2 mb-3 mr-3">
               <Link
-                href={`https://www.google.com/maps/search/?api=1&query=${selectedMarker.latitud},${selectedMarker.longitud}`}
+                href={`https://www.google.com/maps/search/?api=1&query=${selectedMarker.latitude},${selectedMarker.longitude}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-black  font-medium text-base pt-1 flex items-center justify-center border border-black shadow-cartoon-small-xs rounded-lg pr-2 transition-all active:scale-95"
@@ -253,7 +253,7 @@ const Map: React.FC<MapProps> = ({
                 Google Maps
               </Link>
               <Link
-                href={`https://waze.com/ul?ll=${selectedMarker.latitud},${selectedMarker.longitud}&navigate=yes`}
+                href={`https://waze.com/ul?ll=${selectedMarker.latitude},${selectedMarker.longitude}&navigate=yes`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-black  font-medium text-base pt-1 flex gap-2 items-center justify-center border border-black shadow-cartoon-small-xs rounded-lg px-3 transition-all active:scale-95"
@@ -294,7 +294,7 @@ const Map: React.FC<MapProps> = ({
           <Link
             className="flex gap-1 text-dark text-lg px-2 py-1 transition-all hover:scale-110 active:scale-95 rounded-xl border border-black shadow-cartoon-small-xs  bg-white dark:text-black"
             href={`https://www.google.com/maps/dir/${markers
-              .map((p) => `${p.latitud},${p.longitud}`)
+              .map((p) => `${p.latitude},${p.longitude}`)
               .join("/")}`}
             target="_blank"
             rel="noopener noreferrer"
