@@ -1,24 +1,23 @@
 import React, { useEffect, useState } from "react";
 import {
   GoogleMap,
-  Marker,
+  Marker as GoogleMarker,
   DirectionsRenderer,
   InfoWindow,
 } from "@react-google-maps/api";
 import Link from "next/link";
-import { CarFront, Plus, TriangleAlert, X } from "lucide-react";
+import { CarFront, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Novedad, Punto } from "@/types";
+import {  Marker } from "@/types";
 import GoogleMapsIcon from "@/components/ui/icons/google-maps-icon";
 import WazeIcon from "@/components/ui/icons/waze-icon";
 
 
 interface MapComponentProps {
   defaultCenter: { lat: number; lng: number };
-  markers: Punto[];
-  novedades?: Novedad[];
-  tempMarker?: Punto | null;
-  setTempMarker?: React.Dispatch<React.SetStateAction<Punto | null>>;
+  markers: Marker[];
+  tempMarker?: Marker | null;
+  setTempMarker?: React.Dispatch<React.SetStateAction<Marker | null>>;
   zoom: number;
   zoomShowInfoDistance?: number;
   theme: "dark" | "light";
@@ -31,14 +30,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
   markers,
   tempMarker,
   setTempMarker,
-  novedades,
   zoom,
   zoomShowInfoDistance,
   enableAddMarker = true,
   onModalOpen,
 }) => {
-  const [selectedMarker, setSelectedMarker] = useState<Punto | null>(null);
-  const [selectedNovedad, setSelectedNovedad] = useState<Novedad | null>(null);
+  const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [currentZoom, setCurrentZoom] = useState(zoom); // Nivel de zoom inicial
   const [directionsResponse, setDirectionsResponse] =
@@ -108,7 +105,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
           nombre: "",
           latitud: lat,
           longitud: lng,
-          duracion: "0",
           direccion: results[0].formatted_address,
         });
       } else {
@@ -117,7 +113,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
           nombre: "",
           latitud: lat,
           longitud: lng,
-          duracion: "0",
           direccion: "",
         });
       }
@@ -142,7 +137,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       }}
     >
       {markers.map((marker, index) => (
-        <Marker
+        <GoogleMarker
           key={index}
           position={{ lat: marker.latitud, lng: marker.longitud }}
           onClick={() => {
@@ -152,17 +147,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
         />
       ))}
 
-      {novedades &&
-        novedades.map((novedad, index) => (
-          <Marker
-            key={index}
-            position={{ lat: novedad.latitud, lng: novedad.longitud }}
-            onClick={() => {
-              setSelectedNovedad(novedad);
-            }}
-            icon={"/assets/warning-marker.svg"}
-          />
-        ))}
 
       {directionsResponse && (
         <>
@@ -212,7 +196,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       )}
 
       {tempMarker && (
-        <Marker
+        <GoogleMarker
           icon={"/assets/custom-temp-marker.svg"}
           position={{ lat: tempMarker.latitud, lng: tempMarker.longitud }}
           onClick={() => setTempMarker?.(null)}
@@ -258,53 +242,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
               variant={"ghost"}
               className="p-2 text-lg absolute text-muted-foreground top-0 right-0 hover:!bg-white hover:scale-110 transition-all hover:-rotate-[20deg]"
               onClick={() => setSelectedMarker(null)}
-            >
-              <X className="size-5" />
-            </Button>
-          </div>
-        </InfoWindow>
-      )}
-
-      {selectedNovedad && (
-        <InfoWindow
-          position={{
-            lat: selectedNovedad.latitud,
-            lng: selectedNovedad.longitud,
-          }}
-          onCloseClick={() => setSelectedNovedad(null)}
-        >
-          <div className="mt-2">
-            <h3 className="text-lg font-semibold text-black max-w-64 mr-8 flex gap-2 justify-start items-center mb-1">
-              <TriangleAlert className="size-5" />
-              {selectedNovedad.tipo}
-            </h3>
-            <p className="text-muted-foreground text-sm mb-3 mr-2  w-64">
-              {selectedNovedad.nombre || "dirección no encontrada"}
-            </p>
-            <div className="flex gap-2 mb-3 mr-3">
-              <Link
-                href={`https://www.google.com/maps/search/?api=1&query=${selectedNovedad.latitud},${selectedNovedad.longitud}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-black dark:text-white font-medium text-base  pt-1 flex items-center justify-center border border-black shadow-cartoon-small-xs rounded-lg pr-2 transition-all active:scale-95"
-              >
-                <GoogleMapsIcon className="size-8 text-white" />
-                Google Maps
-              </Link>
-              <Link
-                href={`https://waze.com/ul?ll=${selectedNovedad.latitud},${selectedNovedad.longitud}&navigate=yes`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-black dark:text-white font-medium text-base pt-1 flex gap-2 items-center justify-center border border-black shadow-cartoon-small-xs rounded-lg px-3 transition-all active:scale-95"
-              >
-                <WazeIcon className="size-5" />
-                Waze
-              </Link>
-            </div>
-            <Button
-              variant={"ghost"}
-              className="p-2 text-lg absolute text-muted-foreground top-0 right-0 hover:!bg-white hover:scale-110 transition-all hover:-rotate-[20deg]"
-              onClick={() => setSelectedNovedad(null)}
             >
               <X className="size-5" />
             </Button>
