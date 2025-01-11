@@ -3,12 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { useJsApiLoader } from "@react-google-maps/api";
 
-import { useForm } from "react-hook-form";
-
-// Validation
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-
 // import DataTable from "@/components/shared/dataTable/data-table";
 import { Button } from "@/components/ui/button";
 import { LocateFixed, MapPin, MapPinned, Trash, TriangleAlert } from "lucide-react";
@@ -19,77 +13,12 @@ import { Separator } from "@/components/ui/separator";
 
 // import { AsignacionNovedadesTableColumns } from "@/modules/rutas/adapters/columns-novedades";
 import { AnimatePresence, motion } from "framer-motion";
-import { Ruta, Punto, Novedad } from "@/types";
+import { Punto, Novedad } from "@/types";
 import Modal from "@/components/ui/modal";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { NovedadForm } from "./_components/novedad-form";
 import SearchBarDirection from "./_components/search-bar-direction";
 import MapComponent from "./_components/map";
-
-const puntoSchema = yup.object({
-  id: yup.string().nullable(),
-  nombre: yup.string().required("El nombre del punto es requerido"),
-  latitud: yup
-    .number()
-    .required("La latitud es requerida")
-    .min(-90, "La latitud debe estar entre -90 y 90")
-    .max(90, "La latitud debe estar entre -90 y 90"),
-  longitud: yup
-    .number()
-    .required("La longitud es requerida")
-    .min(-180, "La longitud debe estar entre -180 y 180")
-    .max(180, "La longitud debe estar entre -180 y 180"),
-  duracion: yup.string(),
-});
-
-const rutaSchema = yup.object({
-  id: yup.string().nullable(),
-  nombre: yup.string().required("El nombre de la ruta es requerido"),
-  puntos: yup
-    .array()
-    .of(puntoSchema)
-    .min(1, "Debe haber al menos un punto en la ruta")
-    .required("Los puntos son requeridos"),
-  vehiculos: yup
-    .array()
-    .transform((value) => (Array.isArray(value) ? value : [])) // Convierte a array si no lo es
-    .min(1, "Debe seleccionar al menos una opción")
-    .test(
-      "is-not-empty",
-      "Debes seleccionar al menos un vehículo",
-      (value) => (value?.length ?? 0) > 0 // Pasa la validación si hay al menos un elemento
-    )
-    .required("Debes seleccionar al menos un vehículo"),
-  fechaInicio: yup.date().nullable(),
-  fechaLlegada: yup.date().nullable(),
-  recurrencia: yup
-    .mixed<"Diario" | "Semanal" | "Mensual" | "Anual">()
-    .oneOf(["Diario", "Semanal", "Mensual", "Anual"])
-    .nullable(),
-});
-
-const defaultValues: Ruta = {
-  id: null,
-  nombre: "",
-  puntos: [
-    {
-      id: null,
-      nombre: "",
-      latitud: 0,
-      longitud: 0,
-      duracion: "",
-    },
-  ],
-  novedades: undefined,
-  // vehiculos: [],
-  fechaInicio: null,
-  fechaLlegada: null,
-  recurrencia: undefined as unknown as
-    | "Diario"
-    | "Semanal"
-    | "Mensual"
-    | "Anual",
-};
 
 
 const MapForm: React.FC= () => {
@@ -109,12 +38,7 @@ const MapForm: React.FC= () => {
     lng: -75.49279797287063,
   });
   const [locationPermission, setLocationPermission] = useState(false);
-
-  const { setValue, getValues } = useForm<Ruta>({
-    defaultValues:  defaultValues,
-    mode: "onSubmit",
-    resolver: yupResolver(rutaSchema),
-  });
+  const [incidents, setIncidents] = useState<Novedad[] | undefined>();
 
   useEffect(() => {
     if (locationPermission) {
@@ -187,11 +111,11 @@ const MapForm: React.FC= () => {
   const fetchDeletingPunto = async (nombre: string | undefined) => {
     try {
       if (nombre) {
-        // if (data) {
-        //   data.puntos = data.puntos.filter(
-        //     (ruta: Punto) => ruta.nombre !== nombre
-        //   );
-        // }
+        //  if (data) {
+          //  data.puntos = data.puntos.filter(
+            //  (ruta: Punto) => ruta.nombre !== nombre
+          //  );
+        //  }
         if (markers) {
           setMarkers(markers.filter((punto: Punto) => punto.nombre !== nombre));
         }
@@ -205,11 +129,8 @@ const MapForm: React.FC= () => {
   const fetchDeletingIncident = async (nombre: string | undefined) => {
     try {
       if (nombre) {
-        setValue(
-          "novedades",
-          (getValues("novedades") || []).filter(
-            (novedad: Novedad) => novedad.nombre !== nombre
-          )
+        setIncidents((prevIncidents) =>
+          prevIncidents?.filter((novedad) => novedad.nombre !== nombre)
         );
       }
       setConfirmDeletingIncident(false);
@@ -237,24 +158,28 @@ const MapForm: React.FC= () => {
     // Actualizar el estado con la nueva novedad directamente
     setCurrentNovedad(nuevaNovedad);
 
-    // Actualizar el valor en "novedades" (que es un array dentro de `data`)
-    setValue("novedades", [
-      ...(getValues("novedades") || []).filter(
-      (item: Novedad) => item.id !== nuevaNovedad.id
-      ),
-      nuevaNovedad,
-    ]);
+    setIncidents((prevIncidents) => {
+      const updatedIncidents = prevIncidents ? [...prevIncidents] : [];
+      const index = updatedIncidents.findIndex((item) => item.id === nuevaNovedad.id);
+      if (index > -1) {
+      updatedIncidents[index] = nuevaNovedad;
+      } else {
+      updatedIncidents.push(nuevaNovedad);
+      }
+      return updatedIncidents;
+    });
 
-    const novedades = getValues("novedades") || [];
-    const index: number = novedades.findIndex((item: Novedad) => item.id === nuevaNovedad.id);
-    if (index > -1) {
+    // const novedades = getValues("novedades") || [];
+    const index: number = incidents ? incidents.findIndex((item: Novedad) => item.id === nuevaNovedad.id) : -1;
+    if (index > -1 && incidents) {
       // Actualizar novedad existente
-      novedades[index] = nuevaNovedad;
-    } else {
+      incidents[index] = nuevaNovedad;
+    } else if (incidents) {
       // Agregar nueva novedad
-      novedades.push(nuevaNovedad);
+      incidents.push(nuevaNovedad);
     }
-    setValue("novedades", novedades);
+    setIncidents(incidents);
+    // setValue("novedades", novedades);
   };
 
   // const columnsNovedades = AsignacionNovedadesTableColumns(
@@ -285,7 +210,6 @@ const MapForm: React.FC= () => {
     }
 
     setMarkers([...markers, tempMarker]);
-    setValue("puntos", [...markers, tempMarker]);
     setTempMarker(null);
     setShowModalNewPoint(false);
   };
@@ -430,7 +354,7 @@ const MapForm: React.FC= () => {
             <MapComponent
               defaultCenter={defaultCenter}
               markers={markers}
-              novedades={getValues("novedades") || []}
+              novedades={incidents|| []}
               tempMarker={tempMarker}
               setTempMarker={setTempMarker}
               zoom={14}
