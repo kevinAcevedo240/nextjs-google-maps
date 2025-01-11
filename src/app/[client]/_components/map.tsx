@@ -21,7 +21,7 @@ interface MapProps {
   setTempMarker?: React.Dispatch<React.SetStateAction<Marker | null>>;
   zoom: number;
   zoomShowInfoDistance?: number;
-  onModalOpen?: () => void;
+  onModalOpen?: React.Dispatch<React.SetStateAction<boolean>>
   travelMode: string;
 }
 
@@ -154,7 +154,7 @@ const Map: React.FC<MapProps> = ({
       onClick={handleMapClick}
       onLoad={(map) => setMap(map)}
       onZoomChanged={handleZoomChanged}
-      mapContainerClassName="rounded-lg  shadow-custom-black px-3 w-full h-[80vh] lg:h-[90vh]"
+      mapContainerClassName="rounded-lg h-[80vh] lg:h-[89vh] border border-black shadow-cartoon-small dark:shadow-cartoon-small-dark"
       options={{
         fullscreenControl: true,
         zoomControl: false,
@@ -279,7 +279,7 @@ const Map: React.FC<MapProps> = ({
           <Button
             variant={"outline"}
             className="dark:shadow-cartoon-small-xs"
-            onClick={onModalOpen}
+            onClick={() => onModalOpen?.(true)}
             type="button"
           >
             <Plus />

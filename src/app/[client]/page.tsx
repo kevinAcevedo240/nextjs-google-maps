@@ -16,12 +16,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import Modal from "@/components/ui/modal";
 
 // Icons
-import {
-  Earth,
-  // LocateFixed,
-  MapPinned,
-  Trash,
-} from "lucide-react";
+import { Earth, MapPinned, Trash } from "lucide-react";
 
 // Animations
 import { AnimatePresence } from "framer-motion";
@@ -30,12 +25,12 @@ import { AnimatePresence } from "framer-motion";
 import { Marker } from "@/types";
 
 // Custom Components
-import SearchBarDirection from "./_components/search-bar-direction";
-import Map from "./_components/map";
+import SearchBarDirection from "@/app/[client]/_components/search-bar-direction";
+import Map from "@/app/[client]/_components/map";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { travelModes } from "@/lib/travelModesConfig";
-import MarkerCard from "./_components/marker-card";
-import CurrentLocation from "./_components/current-location";
+import MarkerCard from "@/app/[client]/_components/marker-card";
+import CurrentLocation from "@/app/[client]/_components/current-location";
 
 const MapPage: React.FC = () => {
   const [showModalNewMarker, setShowModalNewMarker] = useState(false);
@@ -102,12 +97,6 @@ const MapPage: React.FC = () => {
   const handleOpenDeleteMarker = (current: Marker) => {
     setConfirmDeleting(true);
     setCurrentMarker(current);
-  };
-
-  const handleOpenModalNewMarker = () => {
-    if (!tempMarker) return;
-
-    setShowModalNewMarker(true);
   };
 
   const handleAddMarker = () => {
@@ -189,7 +178,7 @@ const MapPage: React.FC = () => {
           </CardContent>
         </Card>
         <div className="w-full lg:order-2 order-1">
-          <div className="flex flex-wrap justify-between gap-3 md:gap-4 pb-3">
+          <div className="flex flex-wrap  gap-3 pb-3">
             {/* Primera fila: Buscador y Controles */}
             <div className="flex flex-1 items-center gap-3 w-full">
               {/* Buscador */}
@@ -211,11 +200,7 @@ const MapPage: React.FC = () => {
 
             {/* Segunda fila: Tabs */}
             <div className="w-full xl:w-auto">
-              <Tabs
-                value={selectedTravelMode}
-                onValueChange={handleModeChange}
-                className="w-full"
-              >
+              <Tabs value={selectedTravelMode} onValueChange={handleModeChange}>
                 <TabsList className="w-full md:w-auto h-14 sm:h-auto">
                   {travelModes.map((mode) => (
                     <TabsTrigger
@@ -232,19 +217,16 @@ const MapPage: React.FC = () => {
             </div>
           </div>
 
-          <div className=" md:mx-0 border border-black shadow-cartoon-small dark:shadow-cartoon-small-dark rounded-lg">
-            {/* Map */}
-            <Map
-              defaultCenter={defaultCenter}
-              markers={markers}
-              tempMarker={tempMarker}
-              setTempMarker={setTempMarker}
-              zoom={14}
-              zoomShowInfoDistance={14}
-              onModalOpen={handleOpenModalNewMarker}
-              travelMode={selectedTravelMode}
-            />
-          </div>
+          <Map
+            defaultCenter={defaultCenter}
+            markers={markers}
+            tempMarker={tempMarker}
+            setTempMarker={setTempMarker}
+            zoom={14}
+            zoomShowInfoDistance={14}
+            onModalOpen={() => setShowModalNewMarker(true)}
+            travelMode={selectedTravelMode}
+          />
         </div>
       </div>
 
@@ -268,7 +250,7 @@ const MapPage: React.FC = () => {
               value={tempMarker?.name}
               onChange={(e) => {
                 setTempMarker((prev: Marker | null) =>
-                  prev ? { ...prev, nombre: e.target.value || "" } : null
+                  prev ? { ...prev, name: e.target.value || "" } : null
                 );
                 setErrorNameMessage(""); // Limpiar mensaje de error
               }}
