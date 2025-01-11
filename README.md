@@ -50,12 +50,20 @@ git clone https://github.com/kevinAcevedo240/nextjs-google-maps.git
 cd nextjs+googlemaps
 ```
 
-*instalacion*
+*Instalación*
 
 Instala las dependencias del proyecto con npm:
 
 ```bash
 npm install
+```
+
+*Configura las variables de entorno*
+
+Crea un archivo `.env` en la raíz del proyecto y agrega la siguiente variable de entorno con el token generado por Google Maps API:
+
+```env
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_token_de_google_maps_api
 ```
 
 
