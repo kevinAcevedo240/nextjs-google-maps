@@ -106,27 +106,15 @@ const Map: React.FC<MapProps> = ({
 
       // Actualizar la respuesta de direcciones.
       setDirectionsResponse(results);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      // Se verifica si el error es una instancia de MapsRequestError y contiene el mensaje esperado
-      if (
-        error instanceof Error &&
-        error.message.includes("DIRECTIONS_ROUTE: INVALID_REQUEST")
-      ) {
-        toast.error(
-          `No fue posible calcular la ruta para el modo de viaje seleccionado, por favor intente otro modo`,
-          {
-            className:
-              "text-lg border border-primary shadow-cartoon-small-xs dark:shadow-cartoon-small-dark dark:border-black",
-          }
-        );
-      } else {
-        // Para otros tipos de errores, se muestra un mensaje genérico
-        console.error("Error al calcular la ruta:", error);
-        toast.error("Hubo un error inesperado. Intenta de nuevo más tarde.", {
+      toast.error(
+        `No fue posible calcular la ruta para el modo de viaje seleccionado, por favor intente otro modo`,
+        {
           className:
             "text-lg border border-primary shadow-cartoon-small-xs dark:shadow-cartoon-small-dark dark:border-black",
-        });
-      }
+        }
+      );
 
       setDirectionsResponse(null);
     }
@@ -161,7 +149,6 @@ const Map: React.FC<MapProps> = ({
 
   return (
     <GoogleMap
-      // mapContainerStyle={{ width: "100%", height: "800px" }}
       center={defaultCenter}
       zoom={currentZoom}
       onClick={handleMapClick}
@@ -286,19 +273,22 @@ const Map: React.FC<MapProps> = ({
         </InfoWindow>
       )}
 
-      <div className="absolute items-center space-x-4 mx-4 bottom-2 -left-1">
-        <Button
-          variant={"outline"}
-          className="dark:shadow-cartoon-small-xs"
-          onClick={onModalOpen}
-          type="button"
-          disabled={!tempMarker}
-        >
-          <Plus />
-          Añadir punto
-        </Button>
-      </div>
+      {/* Botón flotante para añadir un nuevo punto */}
+      {tempMarker && (
+        <div className="absolute items-center space-x-4 mx-4 bottom-2 -left-1">
+          <Button
+            variant={"outline"}
+            className="dark:shadow-cartoon-small-xs"
+            onClick={onModalOpen}
+            type="button"
+          >
+            <Plus />
+            Añadir punto
+          </Button>
+        </div>
+      )}
 
+      {/* Botón flotante para abrir la ruta en Google Maps */}
       {markers.length >= 1 && (
         <div className="absolute items-center space-x-4 mx-4 bottom-2 -right-1">
           <Link

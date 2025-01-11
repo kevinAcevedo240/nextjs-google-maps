@@ -19,13 +19,12 @@ import Modal from "@/components/ui/modal";
 import {
   Earth,
   LocateFixed,
-  MapPin,
   MapPinned,
   Trash,
 } from "lucide-react";
 
 // Animations
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 
 // Types
 import { Marker } from "@/types";
@@ -35,6 +34,7 @@ import SearchBarDirection from "./_components/search-bar-direction";
 import Map from "./_components/map";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { travelModes } from "@/lib/travelModesConfig";
+import MarkerCard from "./_components/marker-card";
 
 const MapPage: React.FC = () => {
   const [showModalNewMarker, setShowModalNewMarker] = useState(false);
@@ -226,7 +226,7 @@ const MapPage: React.FC = () => {
   if (!isLoaded) {
     return (
       <div className="flex flex-col gap-2 items-center justify-center h-screen ">
-        <div className="font-semibold text-2xl">Cargando mapa...</div>
+        <div className="font-semibold text-2xl animate-pulse">Cargando mapa...</div>
         <Earth className="size-20 text-secondary" />
       </div>
     );
@@ -244,40 +244,7 @@ const MapPage: React.FC = () => {
             {markers.length > 0 ? (
               <AnimatePresence>
                 {markers.map((marker, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Card>
-                      <CardContent>
-                        <h3 className="text-xl font-semibold mb-2 flex gap-2 text-secondary pr-5">
-                          <MapPin />
-                          {marker.nombre}
-                        </h3>
-                        <Separator className="relative bg-primary/50 my-3" />
-                        <div className="flex gap-2 mb-2">
-                          <p className="text-wrap break-words w-1/2">
-                            <strong>Latitud:</strong> {marker.latitud}
-                          </p>
-                          <p className="text-wrap break-words w-1/2">
-                            <strong>Longitud:</strong> {marker.longitud}
-                          </p>
-                        </div>
-                        {marker.direccion && (
-                          <p>
-                            <strong>Dirección:</strong> {marker.direccion}
-                          </p>
-                        )}
-                        <Trash
-                          className="absolute top-3 right-3 size-8 p-1 rounded-lg shadow-cartoon-small-xs dark:shadow-cartoon-small-xs-dark cursor-pointer border border-primary  bg-destructive text-white hover:scale-110 transition-all"
-                          onClick={() => handleOpenDeleteMarker(marker)}
-                        />
-                      </CardContent>
-                    </Card>
-                  </motion.div>
+                  <MarkerCard marker={marker} key={index} onDelete={handleOpenDeleteMarker}/>
                 ))}
               </AnimatePresence>
             ) : (
