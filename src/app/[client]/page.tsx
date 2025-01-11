@@ -35,7 +35,39 @@ const MapForm: React.FC = () => {
   const [errorNameMessage, setErrorNameMessage] = useState<string>("");
   const [currentMarker, setCurrentMarker] = useState<Marker | undefined>();
   const [confirmDeleting, setConfirmDeleting] = useState(false);
-  const [markers, setMarkers] = useState<Marker[]>([]);
+  // const [markers, setMarkers] = useState<Marker[]>([]);
+  const [markers, setMarkers] = useState<Marker[]>([
+    {
+      nombre: "Parque de la 93",
+      latitud: 4.676054,
+      longitud: -74.048073,
+      direccion: "Calle 93A #13-25, Bogotá, Colombia",
+    },
+    {
+      nombre: "Zona T",
+      latitud: 4.668889,
+      longitud: -74.052358,
+      direccion: "Carrera 12a #83-61, Bogotá, Colombia",
+    },
+    {
+      nombre: "Andino Shopping Mall",
+      latitud: 4.667423,
+      longitud: -74.051736,
+      direccion: "Carrera 11 #82-71, Bogotá, Colombia",
+    },
+    {
+      nombre: "Museo Nacional de Colombia",
+      latitud: 4.615734,
+      longitud: -74.070243,
+      direccion: "Carrera 7 #28-66, Bogotá, Colombia",
+    },
+    {
+      nombre: "Monserrate",
+      latitud: 4.605965,
+      longitud: -74.058094,
+      direccion: "Cerro de Monserrate, Bogotá, Colombia",
+    },
+  ]);
   const [tempMarker, setTempMarker] = useState<Marker | null>(null);
   const [defaultCenter, setDefaultCenter] = useState({
     lat: 5.051976778133077,
@@ -187,9 +219,9 @@ const MapForm: React.FC = () => {
 
   return (
     <>
-      <div className=" flex lg:flex-row flex-col gap-4">
-        <Card className="bg-white lg:h-[95vh] dark:bg-black/30 rounded-lg border-black/10 pt-4 overflow-auto  lg:w-1/3  md:mx-0 md:mb-0  lg:order-1 order-2 z-10 border border-black dark:border-white shadow-cartoon-small dark:shadow-cartoon-small-dark ">
-          <CardContent className=" space-y-5">
+      <div className="flex lg:flex-row flex-col gap-4">
+        <Card className="lg:order-1 order-2 overflow-y-scroll h-[80vh] md:h-[95vh]">
+          <CardContent className="space-y-4 ">
             <Label className="text-xl my-3 flex gap-2">
               <MapPinned />
               Puntos
@@ -205,9 +237,9 @@ const MapForm: React.FC = () => {
                       exit={{ opacity: 0, y: 20 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <Card className="bg-white dark:bg-black/30 mb-4 rounded-lg border border-black dark:border-white pt-2 shadow-cartoon-small dark:shadow-cartoon-small-dark relative">
+                      <Card>
                         <CardContent>
-                          <h3 className="text-xl font-semibold mb-2 flex gap-2">
+                          <h3 className="text-xl font-semibold mb-2 flex gap-2 text-secondary">
                             <MapPin />
                             {marker.nombre}
                           </h3>
@@ -226,7 +258,7 @@ const MapForm: React.FC = () => {
                             </p>
                           )}
                           <Trash
-                            className="absolute top-3 right-3 cursor-pointer text-destructive hover:scale-110 transition-all"
+                            className="absolute top-3 right-3 size-8 p-1 rounded-lg shadow-cartoon-small-xs dark:shadow-cartoon-small-xs-dark cursor-pointer border border-primary  bg-destructive text-white hover:scale-110 transition-all"
                             onClick={() => handleOpenDeleteMarker(marker)}
                           />
                         </CardContent>
@@ -283,10 +315,7 @@ const MapForm: React.FC = () => {
       </div>
 
       {/* modal alert direction not found */}
-      <Modal
-        openModal={showModalAlert}
-        setShowModal={setShowModaAlert}
-      >
+      <Modal openModal={showModalAlert} setShowModal={setShowModaAlert}>
         <h2 className="text-2xl md:text-3xl text-primary font-semibold">
           Mapa Dirección
         </h2>
@@ -358,10 +387,7 @@ const MapForm: React.FC = () => {
       </Modal>
 
       {/* Modal confirm delete marker */}
-      <Modal
-        openModal={confirmDeleting}
-        setShowModal={setConfirmDeleting}
-      >
+      <Modal openModal={confirmDeleting} setShowModal={setConfirmDeleting}>
         <h2 className="text-2xl md:text-3xl text-primary font-semibold">
           Eliminar &quot;{currentMarker?.nombre}&quot;
         </h2>

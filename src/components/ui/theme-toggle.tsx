@@ -46,7 +46,7 @@ export function ThemeToggle() {
 
   return (
     <Button variant={"outline"} onClick={toggleTheme} className="size-10 ">
-      {theme === "light" ? <Moon /> : <Sun />}
+      {theme === "light" ? <Moon/> : <Sun/>}
     </Button>
   );
 }

@@ -8,10 +8,9 @@ import {
 import Link from "next/link";
 import { CarFront, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {  Marker } from "@/types";
+import { Marker } from "@/types";
 import GoogleMapsIcon from "@/components/ui/icons/google-maps-icon";
 import WazeIcon from "@/components/ui/icons/waze-icon";
-
 
 interface MapComponentProps {
   defaultCenter: { lat: number; lng: number };
@@ -129,11 +128,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
       onZoomChanged={handleZoomChanged}
       mapContainerClassName="rounded-lg  shadow-custom-black px-3 w-full h-[80vh] lg:h-[90vh]"
       options={{
-      fullscreenControl: true,
-      zoomControl: false,
-      streetViewControl: false,
-      disableDefaultUI: false,
-        // styles: theme === "dark" ? darkModeStyles : [],
+        fullscreenControl: true,
+        zoomControl: false,
+        streetViewControl: false,
+        disableDefaultUI: false,
       }}
     >
       {markers.map((marker, index) => (
@@ -147,14 +145,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
         />
       ))}
 
-
       {directionsResponse && (
         <>
           <DirectionsRenderer
             directions={directionsResponse}
             options={{
               suppressMarkers: true,
-              //   suppressMarkers: currentZoom >= 20 ? false : true,
             }}
           />
           {directionsResponse.routes[0].legs.map((leg, index: number) => {
@@ -223,7 +219,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 href={`https://www.google.com/maps/search/?api=1&query=${selectedMarker.latitud},${selectedMarker.longitud}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-black dark:text-white font-medium text-base  pt-1 flex items-center justify-center border border-black shadow-cartoon-small-xs rounded-lg pr-2 transition-all active:scale-95"
+                className="text-black  font-medium text-base pt-1 flex items-center justify-center border border-black shadow-cartoon-small-xs rounded-lg pr-2 transition-all active:scale-95"
               >
                 <GoogleMapsIcon className="size-8 text-white" />
                 Google Maps
@@ -232,18 +228,18 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 href={`https://waze.com/ul?ll=${selectedMarker.latitud},${selectedMarker.longitud}&navigate=yes`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-black dark:text-white font-medium text-base pt-1 flex gap-2 items-center justify-center border border-black shadow-cartoon-small-xs rounded-lg px-3 transition-all active:scale-95"
+                className="text-black  font-medium text-base pt-1 flex gap-2 items-center justify-center border border-black shadow-cartoon-small-xs rounded-lg px-3 transition-all active:scale-95"
               >
                 <WazeIcon className="size-5" />
                 Waze
               </Link>
             </div>
             <Button
-              variant={"ghost"}
-              className="p-2 text-lg absolute text-muted-foreground top-0 right-0 hover:!bg-white hover:scale-110 transition-all hover:-rotate-[20deg]"
-              onClick={() => setSelectedMarker(null)}
+              variant={"default"}
+              className="absolute top-0 right-0"
+               onClick={() => setSelectedMarker(null)}
             >
-              <X className="size-5" />
+              <X/>
             </Button>
           </div>
         </InfoWindow>
@@ -252,16 +248,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
       {enableAddMarker && (
         <div className="absolute items-center space-x-4 mx-4 bottom-2 -left-1">
           <Button
-            variant={"ghost"}
-            className=" dark:text-black text-black border border-black shadow-cartoon-small-xs text-lg p-3 transition-all hover:scale-110 active:scale-95 rounded-xl bg-white dark:hover:shadow-custom-white hover:bg-white "
-            onClick={(e) => {
-              e.stopPropagation();
+            variant={"outline"}
+            className="dark:shadow-cartoon-small-xs"
+            onClick={() => {
+            //   e.stopPropagation();
               onModalOpen?.();
             }}
             type="button"
             disabled={!tempMarker}
           >
-            <Plus className="mr-2" />
+            <Plus/>
             Añadir punto
           </Button>
         </div>
@@ -270,7 +266,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       {markers.length >= 1 && (
         <div className="absolute items-center space-x-4 mx-4 bottom-2 -right-1">
           <Link
-            className="  flex gap-1 text-dark text-lg p-2 transition-all hover:scale-110 active:scale-95 rounded-xl border border-black shadow-cartoon-small-xs  bg-white dark:text-black"
+            className="flex gap-1 text-dark text-lg px-2 py-1 transition-all hover:scale-110 active:scale-95 rounded-xl border border-black shadow-cartoon-small-xs  bg-white dark:text-black"
             href={`https://www.google.com/maps/dir/${markers
               .map((p) => `${p.latitud},${p.longitud}`)
               .join("/")}`}
