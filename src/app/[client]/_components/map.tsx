@@ -6,32 +6,13 @@ import {
   InfoWindow,
 } from "@react-google-maps/api";
 import Link from "next/link";
-import { BikeIcon, Bus, CarFront, FootprintsIcon, Plus, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Marker } from "@/types";
 import GoogleMapsIcon from "@/components/ui/icons/google-maps-icon";
 import WazeIcon from "@/components/ui/icons/waze-icon";
 import { toast } from "sonner";
-
-// Definir los travelModes
-const travelModes = [
-    {
-      value: google.maps.TravelMode.BICYCLING,
-      label: "Bicicleta",
-      icon: <BikeIcon className="size-6" />,
-    },
-    {
-      value: google.maps.TravelMode.WALKING,
-      label: "Caminar",
-      icon: <FootprintsIcon className="size-6" />,
-    },
-    {
-      value: google.maps.TravelMode.DRIVING,
-      label: "Carro",
-      icon: <CarFront className="size-6" />,
-    },
-    { value: google.maps.TravelMode.TRANSIT, label: "Bus", icon: <Bus className="size-6" /> },
-  ];
+import { travelModes } from "@/lib/travelModesConfig";
 
 interface MapProps {
   defaultCenter: { lat: number; lng: number };
@@ -41,7 +22,7 @@ interface MapProps {
   zoom: number;
   zoomShowInfoDistance?: number;
   onModalOpen?: () => void;
-  travelMode: google.maps.TravelMode;
+  travelMode: string;
 }
 
 const Map: React.FC<MapProps> = ({
@@ -52,7 +33,7 @@ const Map: React.FC<MapProps> = ({
   zoom,
   zoomShowInfoDistance,
   onModalOpen,
-  travelMode = google.maps.TravelMode.DRIVING,
+  travelMode = "DRIVING",
 }) => {
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -60,13 +41,30 @@ const Map: React.FC<MapProps> = ({
   const [directionsResponse, setDirectionsResponse] =
     useState<google.maps.DirectionsResult | null>(null);
 
-     // Buscar el ícono correspondiente al valor de selectedTravelMode
-  const selectedIcon = travelModes.find((mode) => mode.value === travelMode)?.icon;
+  // Función para convertir una cadena a google.maps.TravelMode
+  const getGoogleTravelMode = (mode: string) => {
+    switch (mode) {
+      case "BICYCLING":
+        return google.maps.TravelMode.BICYCLING;
+      case "WALKING":
+        return google.maps.TravelMode.WALKING;
+      case "DRIVING":
+        return google.maps.TravelMode.DRIVING;
+      case "TRANSIT":
+        return google.maps.TravelMode.TRANSIT;
+      default:
+        return google.maps.TravelMode.DRIVING; // Valor predeterminado
+    }
+  };
+
+  // Buscar el ícono correspondiente al valor de selectedTravelMode
+  const selectedIcon = travelModes.find(
+    (mode) => mode.value === travelMode
+  )?.icon;
 
   useEffect(() => {
     if (markers.length > 1) {
       calculateRoute(); // Calcula la ruta cuando haya al menos 2 puntos
-      
     } else {
       setDirectionsResponse(null); // Resetea la respuesta de direcciones si hay menos de 2 puntos
     }
@@ -103,29 +101,35 @@ const Map: React.FC<MapProps> = ({
           lng: markers[markers.length - 1].longitud,
         },
         waypoints: waypoints,
-        travelMode: travelMode,
+        travelMode: getGoogleTravelMode(travelMode),
       });
 
       // Actualizar la respuesta de direcciones.
       setDirectionsResponse(results);
     } catch (error) {
-        // Se verifica si el error es una instancia de MapsRequestError y contiene el mensaje esperado
-        if (error instanceof Error && error.message.includes('DIRECTIONS_ROUTE: INVALID_REQUEST')) {
-          toast.error(`No fue posible calcular la ruta para el modo de viaje seleccionado, por favor intente otro modo`, {
+      // Se verifica si el error es una instancia de MapsRequestError y contiene el mensaje esperado
+      if (
+        error instanceof Error &&
+        error.message.includes("DIRECTIONS_ROUTE: INVALID_REQUEST")
+      ) {
+        toast.error(
+          `No fue posible calcular la ruta para el modo de viaje seleccionado, por favor intente otro modo`,
+          {
             className:
               "text-lg border border-primary shadow-cartoon-small-xs dark:shadow-cartoon-small-dark dark:border-black",
-          });
-        } else {
-          // Para otros tipos de errores, se muestra un mensaje genérico
-          console.error("Error al calcular la ruta:", error);
-          toast.error("Hubo un error inesperado. Intenta de nuevo más tarde.", {
-            className:
-              "text-lg border border-primary shadow-cartoon-small-xs dark:shadow-cartoon-small-dark dark:border-black",
-          });
-        }
-
-        setDirectionsResponse(null);
+          }
+        );
+      } else {
+        // Para otros tipos de errores, se muestra un mensaje genérico
+        console.error("Error al calcular la ruta:", error);
+        toast.error("Hubo un error inesperado. Intenta de nuevo más tarde.", {
+          className:
+            "text-lg border border-primary shadow-cartoon-small-xs dark:shadow-cartoon-small-dark dark:border-black",
+        });
       }
+
+      setDirectionsResponse(null);
+    }
   };
 
   const handleMapClick: (e: google.maps.MapMouseEvent) => void = (e) => {
@@ -214,7 +218,7 @@ const Map: React.FC<MapProps> = ({
                 >
                   <div className="p-2 space-y-1 mr-2">
                     <p className="text-base font-semibold text-black flex justify-start items-center gap-1">
-                    {selectedIcon}
+                      {selectedIcon}
                       {leg.duration?.text || "N/A"}
                     </p>
                     <p className="text-sm text-gray-600">

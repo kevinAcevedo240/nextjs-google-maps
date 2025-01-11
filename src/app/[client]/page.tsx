@@ -17,11 +17,7 @@ import Modal from "@/components/ui/modal";
 
 // Icons
 import {
-  BikeIcon,
-  Bus,
-  CarFront,
   Earth,
-  FootprintsIcon,
   LocateFixed,
   MapPin,
   MapPinned,
@@ -38,13 +34,13 @@ import { Marker } from "@/types";
 import SearchBarDirection from "./_components/search-bar-direction";
 import Map from "./_components/map";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { travelModes } from "@/lib/travelModesConfig";
 
 const MapPage: React.FC = () => {
   const [showModalNewMarker, setShowModalNewMarker] = useState(false);
   const [errorNameMessage, setErrorNameMessage] = useState<string>("");
   const [currentMarker, setCurrentMarker] = useState<Marker | undefined>();
   const [confirmDeleting, setConfirmDeleting] = useState(false);
-  // const [markers, setMarkers] = useState<Marker[]>([]);
   const [markers, setMarkers] = useState<Marker[]>([
     {
       nombre: "Parque de la 93",
@@ -84,32 +80,10 @@ const MapPage: React.FC = () => {
   });
   const [locationPermission, setLocationPermission] = useState(false);
   const [selectedTravelMode, setSelectedTravelMode] =
-    useState<TravelMode>(google.maps.TravelMode.DRIVING);
+    useState<string>("DRIVING");
 
   type TravelMode = google.maps.TravelMode;
 
-  const travelModes: {
-    value: google.maps.TravelMode;
-    label: string;
-    icon: React.ReactNode;
-  }[] = [
-    {
-      value: google.maps.TravelMode.BICYCLING,
-      label: "Bicicleta",
-      icon: <BikeIcon className="mr-2 h-4 w-4" />,
-    },
-    {
-      value: google.maps.TravelMode.WALKING,
-      label: "Caminar",
-      icon: <FootprintsIcon className="mr-2 h-4 w-4" />,
-    },
-    {
-      value: google.maps.TravelMode.DRIVING,
-      label: "Carro",
-      icon: <CarFront className="mr-2 h-4 w-4" />,
-    },
-    { value: google.maps.TravelMode.TRANSIT, label: "Bus", icon: <Bus className="mr-2 h-4 w-4" /> },
-  ];
 
   useEffect(() => {
     if (locationPermission) {
@@ -176,6 +150,7 @@ const MapPage: React.FC = () => {
       );
     }
   }, [locationPermission]);
+
 
   const handleModeChange = (mode: string) => {
     setSelectedTravelMode(mode as TravelMode);
@@ -346,7 +321,7 @@ const MapPage: React.FC = () => {
                     <TabsTrigger
                       key={mode.value}
                       value={mode.value}
-                      className="flex items-center"
+                      className="flex items-center gap-1"
                     >
                       {mode.icon}
                       {mode.label}
