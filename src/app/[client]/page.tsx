@@ -30,7 +30,7 @@ import MapComponent from "./_components/map";
 
 const MapForm: React.FC = () => {
   const [showModalAlert, setShowModaAlert] = useState(false);
-  const [showModalNewPoint, setShowModalNewPoint] = useState(false);
+  const [showModalNewMarker, setShowModalNewMarker] = useState(false);
   const [directionSearch, setDirectionSearch] = useState<string>("");
   const [errorNameMessage, setErrorNameMessage] = useState<string>("");
   const [currentMarker, setCurrentMarker] = useState<Marker | undefined>();
@@ -122,7 +122,7 @@ const MapForm: React.FC = () => {
     }
   };
 
-  const handleOpenDeletePoint = (current: Marker) => {
+  const handleOpenDeleteMarker = (current: Marker) => {
     setConfirmDeleting(true);
     setCurrentMarker(current);
   };
@@ -130,7 +130,7 @@ const MapForm: React.FC = () => {
   const handleOpenModalNewMarker = () => {
     if (!tempMarker) return;
 
-    setShowModalNewPoint(true);
+    setShowModalNewMarker(true);
   };
 
   const handleAddMarker = () => {
@@ -151,7 +151,7 @@ const MapForm: React.FC = () => {
 
     setMarkers([...markers, tempMarker]);
     setTempMarker(null);
-    setShowModalNewPoint(false);
+    setShowModalNewMarker(false);
   };
 
   const requestLocationPermission = () => {
@@ -227,7 +227,7 @@ const MapForm: React.FC = () => {
                           )}
                           <Trash
                             className="absolute top-3 right-3 cursor-pointer text-destructive hover:scale-110 transition-all"
-                            onClick={() => handleOpenDeletePoint(marker)}
+                            onClick={() => handleOpenDeleteMarker(marker)}
                           />
                         </CardContent>
                       </Card>
@@ -286,41 +286,31 @@ const MapForm: React.FC = () => {
       <Modal
         openModal={showModalAlert}
         setShowModal={setShowModaAlert}
-        maxWidth="md:max-w-[50%] xl:max-w-[30%]"
       >
-        <h2 className="text-2xl md:text-3xl text-neutral-600 dark:text-white font-bold text-center mb-4 max-w-xl">
-          Mapa Dirección{" "}
+        <h2 className="text-2xl md:text-3xl text-primary font-semibold">
+          Mapa Dirección
         </h2>
-        <Separator
-          className={"relative bg-border mb-3 dashboard-header-highlight"}
-        />
-        <div className="my-2">
+        <Separator className="my-3" />
+
+        <div className="my-2 space-y-2">
           <p className="text-lg">
             La dirección {directionSearch} no fue encontrada en el mapa
           </p>
-          <div className="flex my-4 gap-5">
-            <Button
-              className="border bg-black/70 p-2 border-black/80 text-white hover:bg-black hover:scale-110 transform transition-all ease-in-out text-lg"
-              onClick={() => setShowModaAlert(false)}
-            >
-              Aceptar
-            </Button>
-          </div>
+          <Button variant={"outline"} onClick={() => setShowModaAlert(false)}>
+            Aceptar
+          </Button>
         </div>
       </Modal>
 
       {/* Add marker name modal */}
       <Modal
-        openModal={showModalNewPoint}
-        setShowModal={setShowModalNewPoint}
-        maxWidth="md:max-w-[50%] xl:max-w-[30%]"
+        openModal={showModalNewMarker}
+        setShowModal={setShowModalNewMarker}
       >
-        <h2 className="text-2xl md:text-3xl text-neutral-600 dark:text-white font-bold text-center mb-4 max-w-xl">
-          Nuevo Punto{" "}
+        <h2 className="text-2xl md:text-3xl text-primary font-semibold">
+          Nuevo Punto
         </h2>
-        <Separator
-          className={"relative bg-border mb-3 dashboard-header-highlight"}
-        />
+        <Separator className="my-3" />
         <div className="my-2">
           <p className="text-muted-foreground mb-3">
             Indica el nombre de el punto seleccionado
@@ -349,7 +339,7 @@ const MapForm: React.FC = () => {
             <Button
               type="button"
               onClick={() => {
-                setShowModalNewPoint(false);
+                setShowModalNewMarker(false);
                 setErrorNameMessage("");
               }}
               variant={"ghost"}
@@ -371,7 +361,6 @@ const MapForm: React.FC = () => {
       <Modal
         openModal={confirmDeleting}
         setShowModal={setConfirmDeleting}
-        maxWidth="md:max-w-[50%] xl:max-w-[30%]"
       >
         <h2 className="text-2xl md:text-3xl text-primary font-semibold">
           Eliminar &quot;{currentMarker?.nombre}&quot;
