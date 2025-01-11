@@ -1,44 +1,89 @@
-'use client'
+"use client";
 
+// React and Hooks
 import React, { useEffect, useState } from "react";
+
+// Google Maps API
 import { useJsApiLoader } from "@react-google-maps/api";
 
-// import DataTable from "@/components/shared/dataTable/data-table";
+// UI Components
 import { Button } from "@/components/ui/button";
-import { LocateFixed, MapPin, MapPinned, Trash, TriangleAlert } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-
-// import { AsignacionNovedadesTableColumns } from "@/modules/rutas/adapters/columns-novedades";
-import { AnimatePresence, motion } from "framer-motion";
-import { Punto, Novedad } from "@/types";
-import Modal from "@/components/ui/modal";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { NovedadForm } from "./_components/novedad-form";
+import Modal from "@/components/ui/modal";
+
+// Icons
+import {
+  Earth,
+  LocateFixed,
+  MapPin,
+  MapPinned,
+  Trash,
+} from "lucide-react";
+
+// Animations
+import { AnimatePresence, motion } from "framer-motion";
+
+// Types
+import { Marker } from "@/types";
+
+// Custom Components
 import SearchBarDirection from "./_components/search-bar-direction";
-import MapComponent from "./_components/map";
+import Map from "./_components/map";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { travelModes } from "@/lib/travelModesConfig";
 
-
-const MapForm: React.FC= () => {
-  const [showModalAlert, setShowModaAlert] = useState(false);
-  const [showModalNewPoint, setShowModalNewPoint] = useState(false);
-  const [showModalNewIncident, setShowModalNewIncident] = useState(false);
-  const [directionSearch, setDirectionSearch] = useState<string>("");
+const MapPage: React.FC = () => {
+  const [showModalNewMarker, setShowModalNewMarker] = useState(false);
   const [errorNameMessage, setErrorNameMessage] = useState<string>("");
-  const [currentPoint, setcurrentPoint] = useState<Punto | undefined>();
-  const [currentNovedad, setCurrentNovedad] = useState<Novedad | undefined>();
+  const [currentMarker, setCurrentMarker] = useState<Marker | undefined>();
   const [confirmDeleting, setConfirmDeleting] = useState(false);
-  const [confirmDeletingIncident, setConfirmDeletingIncident] = useState(false);
-  const [markers, setMarkers] = useState<Punto[]>([]);
-  const [tempMarker, setTempMarker] = useState<Punto | null>(null);
+  const [markers, setMarkers] = useState<Marker[]>([
+    {
+      nombre: "Parque de la 93",
+      latitud: 4.676054,
+      longitud: -74.048073,
+      direccion: "Calle 93A #13-25, Bogotá, Colombia",
+    },
+    {
+      nombre: "Zona T",
+      latitud: 4.668889,
+      longitud: -74.052358,
+      direccion: "Carrera 12a #83-61, Bogotá, Colombia",
+    },
+    {
+      nombre: "Andino Shopping Mall",
+      latitud: 4.667423,
+      longitud: -74.051736,
+      direccion: "Carrera 11 #82-71, Bogotá, Colombia",
+    },
+    {
+      nombre: "Museo Nacional de Colombia",
+      latitud: 4.615734,
+      longitud: -74.070243,
+      direccion: "Carrera 7 #28-66, Bogotá, Colombia",
+    },
+    {
+      nombre: "Monserrate",
+      latitud: 4.605965,
+      longitud: -74.058094,
+      direccion: "Cerro de Monserrate, Bogotá, Colombia",
+    },
+  ]);
+  const [tempMarker, setTempMarker] = useState<Marker | null>(null);
   const [defaultCenter, setDefaultCenter] = useState({
     lat: 5.051976778133077,
     lng: -75.49279797287063,
   });
   const [locationPermission, setLocationPermission] = useState(false);
-  const [incidents, setIncidents] = useState<Novedad[] | undefined>();
+  const [selectedTravelMode, setSelectedTravelMode] =
+    useState<string>("DRIVING");
+
+  type TravelMode = google.maps.TravelMode;
+
 
   useEffect(() => {
     if (locationPermission) {
@@ -69,7 +114,6 @@ const MapForm: React.FC= () => {
                   nombre: "",
                   latitud: latitude,
                   longitud: longitude,
-                  duracion: "0",
                   direccion: results[0].formatted_address,
                 });
               } else {
@@ -78,7 +122,6 @@ const MapForm: React.FC= () => {
                   nombre: "",
                   latitud: latitude,
                   longitud: longitude,
-                  duracion: "0",
                   direccion: "",
                 });
               }
@@ -106,19 +149,19 @@ const MapForm: React.FC= () => {
         options
       );
     }
-  }, [ locationPermission]);
+  }, [locationPermission]);
 
-  const fetchDeletingPunto = async (nombre: string | undefined) => {
+
+  const handleModeChange = (mode: string) => {
+    setSelectedTravelMode(mode as TravelMode);
+  };
+
+  const fetchDeletingMarker = async (nombre: string | undefined) => {
     try {
       if (nombre) {
-        //  if (data) {
-          //  data.puntos = data.puntos.filter(
-            //  (ruta: Punto) => ruta.nombre !== nombre
-          //  );
-        //  }
-        if (markers) {
-          setMarkers(markers.filter((punto: Punto) => punto.nombre !== nombre));
-        }
+        setMarkers(
+          markers.filter((Marker: Marker) => Marker.nombre !== nombre)
+        );
       }
       setConfirmDeleting(false);
     } catch (error) {
@@ -126,77 +169,15 @@ const MapForm: React.FC= () => {
     }
   };
 
-  const fetchDeletingIncident = async (nombre: string | undefined) => {
-    try {
-      if (nombre) {
-        setIncidents((prevIncidents) =>
-          prevIncidents?.filter((novedad) => novedad.nombre !== nombre)
-        );
-      }
-      setConfirmDeletingIncident(false);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleOpenDeletePoint = (current: Punto) => {
+  const handleOpenDeleteMarker = (current: Marker) => {
     setConfirmDeleting(true);
-    setcurrentPoint(current);
-  };
-
-   const handleOpenDeleteIncident = (current: Novedad) => {
-     setConfirmDeletingIncident(true);
-     setCurrentNovedad(current);
-   };
-
-  // const handleOpenModalAndSetCurrentNovedad = (current: Novedad) => {
-  //   setShowModalNewIncident(true);
-  //   setCurrentNovedad(current);
-  // };
-
-  const handleGuardarNovedad = (nuevaNovedad: Novedad) => {
-    // Actualizar el estado con la nueva novedad directamente
-    setCurrentNovedad(nuevaNovedad);
-
-    setIncidents((prevIncidents) => {
-      const updatedIncidents = prevIncidents ? [...prevIncidents] : [];
-      const index = updatedIncidents.findIndex((item) => item.id === nuevaNovedad.id);
-      if (index > -1) {
-      updatedIncidents[index] = nuevaNovedad;
-      } else {
-      updatedIncidents.push(nuevaNovedad);
-      }
-      return updatedIncidents;
-    });
-
-    // const novedades = getValues("novedades") || [];
-    const index: number = incidents ? incidents.findIndex((item: Novedad) => item.id === nuevaNovedad.id) : -1;
-    if (index > -1 && incidents) {
-      // Actualizar novedad existente
-      incidents[index] = nuevaNovedad;
-    } else if (incidents) {
-      // Agregar nueva novedad
-      incidents.push(nuevaNovedad);
-    }
-    setIncidents(incidents);
-    console.log(incidents);
-    // setValue("novedades", novedades);
-  };
-
-  // const columnsNovedades = AsignacionNovedadesTableColumns(
-  //   handleOpenModalAndSetCurrentNovedad,
-  //   handleOpenDeleteIncident
-  // );
-
-  const handleOpenModalNewIncident = () => {
-    setShowModalNewIncident(true)
-    setCurrentNovedad(undefined);
+    setCurrentMarker(current);
   };
 
   const handleOpenModalNewMarker = () => {
     if (!tempMarker) return;
 
-    setShowModalNewPoint(true);
+    setShowModalNewMarker(true);
   };
 
   const handleAddMarker = () => {
@@ -217,7 +198,7 @@ const MapForm: React.FC= () => {
 
     setMarkers([...markers, tempMarker]);
     setTempMarker(null);
-    setShowModalNewPoint(false);
+    setShowModalNewMarker(false);
   };
 
   const requestLocationPermission = () => {
@@ -237,236 +218,145 @@ const MapForm: React.FC= () => {
     }
   };
 
-  const handleSearchError = (query: string) => {
-    setDirectionSearch(query);
-    setShowModaAlert(true);
-  };
-
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
     libraries: ["places"],
   });
 
   if (!isLoaded) {
-    return <div className="font-semibold text-2xl">Cargando mapa...</div>;
+    return (
+      <div className="flex flex-col gap-2 items-center justify-center h-screen ">
+        <div className="font-semibold text-2xl">Cargando mapa...</div>
+        <Earth className="size-20 text-secondary" />
+      </div>
+    );
   }
 
   return (
     <>
-      <div className=" flex lg:flex-row flex-col gap-4">
-        {/* Data table punto and novedades */}
-        <Card className="bg-white lg:h-[95vh] dark:bg-black/30 rounded-lg border-black/10 pt-4 overflow-auto  lg:w-1/3  md:mx-0 md:mb-0  lg:order-1 order-2 z-10 border border-black dark:border-white shadow-cartoon-small dark:shadow-cartoon-small-dark ">
-          <CardContent className=" space-y-5">
-            {markers.length > 0 && (
+      <div className="flex lg:flex-row flex-col gap-4">
+        <Card className="lg:order-1 order-2 overflow-y-scroll h-[80vh] md:h-[95vh]">
+          <CardContent className="space-y-4 ">
+            <Label className="flex gap-2">
+              <MapPinned />
+              Puntos
+            </Label>
+            {markers.length > 0 ? (
               <>
-                <div>
-                  <Label className="text-xl my-3 flex gap-2">
-                    <MapPinned />
-                    Puntos
-                  </Label>
-
-                  <AnimatePresence>
-                    {markers.map((marker, index) => (
-                      <motion.div
-                        key={marker.id || index} // Asegúrate de usar un ID único si es posible
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <Card className="bg-white dark:bg-black/30 mb-4 rounded-lg border border-black dark:border-white pt-2 shadow-cartoon-small dark:shadow-cartoon-small-dark relative">
-                          <CardContent>
-                            <h3 className="text-xl font-semibold mb-2 flex gap-2">
-                              <MapPin />
-                              {marker.nombre}
-                            </h3>
-                            <Separator className="relative bg-black/30 my-3 dark:bg-white " />
-                            <div className="flex gap-2 mb-2">
-                              <p className="text-wrap break-words w-1/2">
-                                <strong>Latitud:</strong> {marker.latitud}
-                              </p>
-                              <p className="text-wrap break-words w-1/2">
-                                <strong>Longitud:</strong> {marker.longitud}
-                              </p>
-                            </div>
-                            {marker.direccion && (
-                              <p>
-                                <strong>Dirección:</strong> {marker.direccion}
-                              </p>
-                            )}
-                            <Trash
-                              className="absolute top-3 right-3 cursor-pointer text-destructive hover:scale-110 transition-all"
-                              onClick={() => handleOpenDeletePoint(marker)}
-                            />
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-                <Separator className="relative bg-black/40 dark:bg-white " />
+                <AnimatePresence>
+                  {markers.map((marker, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Card>
+                        <CardContent>
+                          <h3 className="text-xl font-semibold mb-2 flex gap-2 text-secondary pr-5">
+                            <MapPin />
+                            {marker.nombre}
+                          </h3>
+                          <Separator className="relative bg-primary/50 my-3" />
+                          <div className="flex gap-2 mb-2">
+                            <p className="text-wrap break-words w-1/2">
+                              <strong>Latitud:</strong> {marker.latitud}
+                            </p>
+                            <p className="text-wrap break-words w-1/2">
+                              <strong>Longitud:</strong> {marker.longitud}
+                            </p>
+                          </div>
+                          {marker.direccion && (
+                            <p>
+                              <strong>Dirección:</strong> {marker.direccion}
+                            </p>
+                          )}
+                          <Trash
+                            className="absolute top-3 right-3 size-8 p-1 rounded-lg shadow-cartoon-small-xs dark:shadow-cartoon-small-xs-dark cursor-pointer border border-primary  bg-destructive text-white hover:scale-110 transition-all"
+                            onClick={() => handleOpenDeleteMarker(marker)}
+                          />
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </>
+            ) : (
+              <p className="text-primary text-base md:text-xl text-center mt-4 border-2 border-dashed py-3 rounded-lg">
+                No hay puntos creados aún.
+              </p>
             )}
-            <div>
-              <Label className="text-xl mt-2 flex gap-2">
-                <TriangleAlert />
-                Novedades
-              </Label>
-
-              <Button
-                variant={"outline"}
-                // className="dark:text-black  ml-0 sm:ml-2 md:mx-0 text-white text-lg p-3 sm:p-4 transition-all hover:scale-110 active:scale-95 rounded-lg dark:bg-white dark:hover:shadow-custom-white hover:bg-black hover:text-white bg-black"
-                onClick={handleOpenModalNewIncident}
-              >
-                <LocateFixed className="sm:mr-2" />
-                Nuevo incidente
-              </Button>
-              <AnimatePresence>
-                {incidents?.map((incident, index) => (
-                  <motion.div
-                    key={incident.id || index}
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Card className="bg-white dark:bg-black/30 mb-4 rounded-lg border border-black dark:border-white pt-2 shadow-cartoon-small dark:shadow-cartoon-small-dark relative">
-                      <CardContent>
-                        <h3 className="text-xl font-semibold mb-2 flex gap-2">
-                          <MapPin />
-                          {incident.nombre}
-                        </h3>
-                        <Separator className="relative bg-black/30 my-3 dark:bg-white" />
-                        <div className="flex gap-2 mb-2">
-                          <p className="text-wrap break-words w-1/2">
-                            <strong>Latitud:</strong> {incident.latitud}
-                          </p>
-                          <p className="text-wrap break-words w-1/2">
-                            <strong>Longitud:</strong> {incident.longitud}
-                          </p>
-                        </div>
-                        <p>
-                          <strong>Duración:</strong> {incident.duracion}
-                        </p>
-                        <p>
-                          <strong>Tipo:</strong> {incident.tipo}
-                        </p>
-                        <Trash
-                          className="absolute top-3 right-3 cursor-pointer text-destructive hover:scale-110 transition-all"
-                          onClick={() => handleOpenDeleteIncident(incident)}
-                        />
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              {/* <DataTable
-                columns={columnsNovedades}
-                data={getValues("novedades") || []}
-                setShowModal={setShowModalNewIncident}
-                setCurrentEntity={setCurrentNovedad}
-                labelButtonNew="Nueva Novedad"
-                columnFiltersVisible={false}
-                searcherVisible={false}
-                newbuttonVisible={true}
-                paginationVisible={false}
-                showTopActions={true}
-                noResultsMessage="No hay novedad en la ruta definidos."
-                searchPlaceholder="Buscar novedad"
-                tableclassName=""
-              /> */}
-            </div>
           </CardContent>
         </Card>
         <div className="w-full lg:order-2 order-1">
-          {/* Buscador */}
-          <div className=" justify-between gap-3 md:gap-6 pb-3 flex">
-            <div className="w-full  ">
-              <SearchBarDirection
-                onSearchResult={handleSearchResult}
-                onSearchError={handleSearchError}
-                onLocationUpdate={(lat: number, lng: number) =>
-                  setDefaultCenter({ lat, lng })
-                }
-              />
+          <div className="flex flex-wrap justify-between gap-3 md:gap-4 pb-3">
+            {/* Primera fila: Buscador y Controles */}
+            <div className="flex flex-1 items-center gap-3 w-full">
+              {/* Buscador */}
+              <div className="flex w-full">
+                <SearchBarDirection
+                  onSearchResult={handleSearchResult}
+                  onLocationUpdate={(lat: number, lng: number) =>
+                    setDefaultCenter({ lat, lng })
+                  }
+                />
+              </div>
+
+              {/* Botones de Geolocalización y Tema */}
+              <div className="flex gap-2">
+                <Button variant={"ghost"} onClick={requestLocationPermission}>
+                  <LocateFixed />
+                  <span className="sm:block hidden">Tu Ubicación</span>
+                </Button>
+                <ThemeToggle />
+              </div>
             </div>
 
-            <div className="flex gap-2">
-              {/* Botón para activar geolocalización */}
-              <Button
-                variant={"outline"}
-                // className="dark:text-black  ml-0 sm:ml-2 md:mx-0 text-white text-lg p-3 sm:p-4 transition-all hover:scale-110 active:scale-95 rounded-lg dark:bg-white dark:hover:shadow-custom-white hover:bg-black hover:text-white bg-black"
-                onClick={requestLocationPermission}
-              >
-                <LocateFixed className="sm:mr-2" />
-                <span className="sm:block hidden">Tu Ubicación</span>
-              </Button>
-              <ThemeToggle />
+            {/* Segunda fila: Tabs */}
+            <div className="w-full xl:w-auto ">
+              <Tabs value={selectedTravelMode} onValueChange={handleModeChange} className="w-full">
+                <TabsList className="w-full md:w-auto">
+                  {travelModes.map((mode) => (
+                    <TabsTrigger
+                      key={mode.value}
+                      value={mode.value}
+                      className="flex items-center gap-1"
+                    >
+                      {mode.icon}
+                      {mode.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
             </div>
           </div>
 
-          <div className=" md:mx-0 border border-black shadow-cartoon-small rounded-lg">
-            {/* Mapa */}
-            <MapComponent
+          <div className=" md:mx-0 border border-black shadow-cartoon-small dark:shadow-cartoon-small-dark rounded-lg">
+            {/* Map */}
+            <Map
               defaultCenter={defaultCenter}
               markers={markers}
-              novedades={incidents || []}
               tempMarker={tempMarker}
               setTempMarker={setTempMarker}
               zoom={14}
               zoomShowInfoDistance={14}
-              theme="light"
-              enableAddMarker={true}
               onModalOpen={handleOpenModalNewMarker}
+              travelMode={selectedTravelMode}
             />
           </div>
-
-          {/* <TempMarkerLatLog
-            tempMarker={tempMarker}
-            setTempMarker={setTempMarker}
-          /> */}
         </div>
       </div>
 
-      {/* modal alert direction not found */}
-      <Modal
-        openModal={showModalAlert}
-        setShowModal={setShowModaAlert}
-        maxWidth="md:max-w-[50%] xl:max-w-[30%]"
-      >
-        <h2 className="text-2xl md:text-3xl text-neutral-600 dark:text-white font-bold text-center mb-4 max-w-xl">
-          Mapa Dirección{" "}
-        </h2>
-        <Separator
-          className={"relative bg-border mb-3 dashboard-header-highlight"}
-        />
-        <div className="my-2">
-          <p className="text-lg">
-            La dirección {directionSearch} no fue encontrada en el mapa
-          </p>
-          <div className="flex my-4 gap-5">
-            <Button
-              className="border bg-black/70 p-2 border-black/80 text-white hover:bg-black hover:scale-110 transform transition-all ease-in-out text-lg"
-              onClick={() => setShowModaAlert(false)}
-            >
-              Aceptar
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
       {/* Add marker name modal */}
       <Modal
-        openModal={showModalNewPoint}
-        setShowModal={setShowModalNewPoint}
-        maxWidth="md:max-w-[50%] xl:max-w-[30%]"
+        openModal={showModalNewMarker}
+        setShowModal={setShowModalNewMarker}
       >
-        <h2 className="text-2xl md:text-3xl text-neutral-600 dark:text-white font-bold text-center mb-4 max-w-xl">
-          Nuevo Punto{" "}
+        <h2 className="text-2xl md:text-3xl text-primary font-semibold">
+          Nuevo Punto
         </h2>
-        <Separator
-          className={"relative bg-border mb-3 dashboard-header-highlight"}
-        />
+        <Separator className="my-3" />
         <div className="my-2">
           <p className="text-muted-foreground mb-3">
             Indica el nombre de el punto seleccionado
@@ -477,10 +367,10 @@ const MapForm: React.FC= () => {
             <Input
               value={tempMarker?.nombre}
               onChange={(e) => {
-                setTempMarker((prev: Punto | null) =>
+                setTempMarker((prev: Marker | null) =>
                   prev ? { ...prev, nombre: e.target.value || "" } : null
                 );
-                setErrorNameMessage(""); // Clear error message when typing
+                setErrorNameMessage(""); // Limpiar mensaje de error
               }}
               type="text"
               onKeyDown={(e) => {
@@ -495,7 +385,7 @@ const MapForm: React.FC= () => {
             <Button
               type="button"
               onClick={() => {
-                setShowModalNewPoint(false);
+                setShowModalNewMarker(false);
                 setErrorNameMessage("");
               }}
               variant={"ghost"}
@@ -513,97 +403,28 @@ const MapForm: React.FC= () => {
         </div>
       </Modal>
 
-      {/* Add incident modal */}
-      <Modal
-        openModal={showModalNewIncident}
-        setShowModal={setShowModalNewIncident}
-        maxWidth="md:max-w-[50%] xl:max-w-[40%]"
-      >
-        <h2 className="text-2xl md:text-3xl text-neutral-600 dark:text-white font-bold md:text-start mb-4 max-w-xl">
-          {currentNovedad ? "Editar Novedad" : "Nueva Novedad"}
-        </h2>
-        <Separator
-          className={"relative bg-border mb-3 dashboard-header-highlight"}
-        />
-
-        <NovedadForm
-          setShowModal={setShowModalNewIncident}
-          setCurrentNovedad={setCurrentNovedad}
-          currentNovedad={currentNovedad}
-          onGuardarNovedad={handleGuardarNovedad}
-        />
-      </Modal>
-
       {/* Modal confirm delete marker */}
-      <Modal
-        openModal={confirmDeleting}
-        setShowModal={setConfirmDeleting}
-        maxWidth="md:max-w-[50%] xl:max-w-[30%]"
-      >
-        <h2 className="text-2xl md:text-3xl text-neutral-600 dark:text-white font-bold text-center mb-4 max-w-xl">
-          Eliminar{" "}
-          <span className="px-1 py-0.5 rounded-md bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-black/40 ">
-            {currentPoint?.nombre}
-          </span>
+      <Modal openModal={confirmDeleting} setShowModal={setConfirmDeleting}>
+        <h2 className="text-2xl md:text-3xl text-primary font-semibold">
+          Eliminar &quot;{currentMarker?.nombre}&quot;
         </h2>
-        <Separator
-          className={"relative bg-border mb-3 dashboard-header-highlight"}
-        />
+        <Separator className="my-3" />
         <div className="my-2">
           <p className="text-lg">
-            ¿Estás seguro que deseas eliminar este punto?
+            ¿Estás seguro que deseas eliminar este Punto?
           </p>
-          <div className="flex my-4 gap-5">
-            <Button
-              variant={"destructive"}
-              onClick={() =>
-                fetchDeletingPunto(currentPoint?.nombre ?? undefined)
-              }
-            >
-              <Trash className="mr-2" size={20} />
-              Eliminar
-            </Button>
+          <div className="flex my-4 gap-5 justify-end">
             <Button variant={"ghost"} onClick={() => setConfirmDeleting(false)}>
               Cancelar
             </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Modal confirm delete incident */}
-      <Modal
-        openModal={confirmDeletingIncident}
-        setShowModal={setConfirmDeletingIncident}
-        maxWidth="md:max-w-[50%] xl:max-w-[30%]"
-      >
-        <h2 className="text-2xl md:text-3xl text-neutral-600 dark:text-white font-bold text-center mb-4 max-w-xl">
-          Eliminar{" "}
-          <span className="px-1 py-0.5 rounded-md bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-black/40 ">
-            {currentNovedad?.nombre}
-          </span>
-        </h2>
-        <Separator
-          className={"relative bg-border mb-3 dashboard-header-highlight"}
-        />
-        <div className="my-2">
-          <p className="text-lg">
-            ¿Estás seguro que deseas eliminar esta novedad?
-          </p>
-          <div className="flex my-4 gap-5">
             <Button
               variant={"destructive"}
               onClick={() =>
-                fetchDeletingIncident(currentNovedad?.nombre ?? undefined)
+                fetchDeletingMarker(currentMarker?.nombre ?? undefined)
               }
             >
-              <Trash className="mr-2" size={20} />
+              <Trash />
               Eliminar
-            </Button>
-            <Button
-              variant={"ghost"}
-              onClick={() => setConfirmDeletingIncident(false)}
-            >
-              Cancelar
             </Button>
           </div>
         </div>
@@ -612,4 +433,4 @@ const MapForm: React.FC= () => {
   );
 };
 
-export default MapForm;
+export default MapPage;

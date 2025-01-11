@@ -46,7 +46,7 @@ export default function Modal({ openModal, setShowModal, children, maxWidth }: M
             ref={modalRef}
             className={cn(
               " max-h-[80%] bg-white shadow-cartoon-small dark:shadow-cartoon-small-dark border border-black dark:border-white dark:bg-background mx-3 rounded-2xl relative z-50 flex flex-col flex-1 overflow-auto dark:bg-[url('/assets/background/grain-bg.svg')] dark:bg-auto dark:bg-repeat"
-              , maxWidth ? `${maxWidth}` : "max-w-[50%]"
+              , maxWidth ? `${maxWidth}` : "md:max-w-[50%] xl:max-w-[30%]"
             )}
             initial={{ opacity: 0, scale: 0.5, rotateX: 40, y: 40 }}
             animate={{ opacity: 1, scale: 1, rotateX: 0, y: 0 }}
